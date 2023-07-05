@@ -6,7 +6,7 @@
 typedef enum {TOKENIZER_OK, TOKENIZER_FAILURE}TokenizerResult;
 typedef enum {INT,DOUBLE,VAR,TABLE,STRING,SELECT,INSERT,WHERE,FROM,DISTINCT,LEFT_PARENTHESIS,
                 RIGHT_PARENTHESIS,GREATER,LESS,GEQ,LEQ,EQUAL,NOT_EQUAL,ADD,SUBTRACT,MULTIPLY,DIVIDE,
-                AND,OR,GROUP,ORDER,BY,COUNT,SUM,LIMIT,COMMA}TokenType;
+                AND,OR,GROUP,ORDER,BY,COUNT,SUM,LIMIT,COMMA,ASC,DESC}TokenType;
 
 typedef enum {VARIABLE,TABLE_NAME}TokenizerIndex;
 
@@ -53,5 +53,8 @@ int isSumKeyword(char buffer[]);
 int isGroupKeyword(char buffer[]);
 int isOrderKeyword(char buffer[]);
 int isByKeyword(char buffer[]);
+int isDescKeyword(char buffer[]);
+int isAscKeyword(char buffer[]);
+int isLimitKeyword(char buffer[]);
 
 #endif //DND_TOKENIZER_H

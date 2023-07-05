@@ -211,7 +211,7 @@ GList *tokenizeWord(GList *l,char buffer[],char *query,int *i){
             strncat(buffer,&byte,1);
             index = VARIABLE;
         }
-        else if(isWhitespace(byte)==1 || byte==',' || byte=='(' ||
+        else if(isWhitespace(byte)==1 || byte==',' || byte=='(' || byte==')' ||
                     isOperator(byte) || byte=='<' || byte=='>' || byte=='!'){
             break;
         }
@@ -262,6 +262,8 @@ void token_print(void *data,void *extra){
     else if(token->type==WHERE) printf("WHERE");
     else if(token->type==FROM) printf("FROM");
     else if(token->type==DISTINCT) printf("DISTINCT");
+    else if(token->type==ASC) printf("ASC");
+    else if(token->type==DESC) printf("DESC");
     else if(token->type==LEFT_PARENTHESIS) printf("(");
     else if(token->type==RIGHT_PARENTHESIS) printf(")");
     else if(token->type==EQUAL) printf("=");
@@ -345,6 +347,9 @@ TokenType isKeyword(char buffer[]){
     else if(isGroupKeyword(buffer)==1) return GROUP;
     else if(isOrderKeyword(buffer)==1) return ORDER;
     else if(isByKeyword(buffer)==1) return BY;
+    else if(isAscKeyword(buffer)==1) return ASC;
+    else if(isDescKeyword(buffer)==1) return DESC;
+    else if(isLimitKeyword(buffer)==1) return LIMIT;
     else return -1;
 }
 
@@ -446,5 +451,32 @@ int isByKeyword(char buffer[]){
     if(strlen(buffer)!=2) return 0;
     if(buffer[0]!='B' && buffer[0]!='b') return 0;
     if(buffer[1]!='Y' && buffer[1]!='y') return 0;
+    return 1;
+}
+
+int isDescKeyword(char buffer[]){
+    if(strlen(buffer)!=4) return 0;
+    if(buffer[0]!='D' && buffer[0]!='d') return 0;
+    if(buffer[1]!='E' && buffer[1]!='e') return 0;
+    if(buffer[2]!='S' && buffer[2]!='s') return 0;
+    if(buffer[3]!='C' && buffer[3]!='c') return 0;
+    return 1;
+}
+
+int isAscKeyword(char buffer[]){
+    if(strlen(buffer)!=3) return 0;
+    if(buffer[0]!='A' && buffer[0]!='a') return 0;
+    if(buffer[1]!='S' && buffer[1]!='s') return 0;
+    if(buffer[2]!='C' && buffer[2]!='c') return 0;
+    return 1;
+}
+
+int isLimitKeyword(char buffer[]){
+    if(strlen(buffer)!=5) return 0;
+    if(buffer[0]!='L' && buffer[0]!='l') return 0;
+    if(buffer[1]!='I' && buffer[1]!='i') return 0;
+    if(buffer[2]!='M' && buffer[2]!='m') return 0;
+    if(buffer[3]!='I' && buffer[3]!='i') return 0;
+    if(buffer[4]!='T' && buffer[4]!='t') return 0;
     return 1;
 }

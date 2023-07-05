@@ -14,7 +14,7 @@ LDLIBS = $(shell pkg-config --libs glib-2.0)
 
 # set the name of the executable file to compile here
 PROGRAM = main
-OBJS = main.o ./compiler/tokenizer.o
+OBJS = main.o ./compiler/tokenizer.o ./compiler/parser.o
 
 
 $(PROGRAM): $(OBJS)
