@@ -3,18 +3,22 @@
 #include <stdlib.h>
 #include "./compiler/tokenizer.h"
 #include "./compiler/parser.h"
+#include "./disk/block.h"
+#include "./memory/priority_queue.h"
+#include "./memory/buffer_manager.h"
 
 int main(){
-    GList *tokens = tokenize("SEleCT Table.id,Table.salary FROM Table,Tabas,Taboo WHERE Table.id = 5 AND Table.salary = 'aeijfas'"
-                             " ORDER BY COUNT(Table.id) ASC LIMIT 6 1");
-    printf("\nTOKENS: %d\n",g_list_length(tokens));
-    print_all_tokens(tokens);
-    Statement *statement = parse_statement(&tokens);
-    if(statement!=NULL)
-        statement_print(statement);
+    BlockAllocator *allocator = block_allocator_initialize(BUFFER_SIZE);
+    Block *block = block_init();
 
-    g_list_free_full(tokens,token_free);
-    if(statement!=NULL)
-        statement_free(statement);
+    block_file_create("temp");
+    int fd = block_file_open(&allocator,"temp");
+    block = block_allocate(&allocator,fd,block);
+    block = block_allocate(&allocator,fd,block);
+    block = block_allocate(&allocator,fd,block);
+
+    block_get(&allocator,fd,1,&block);
+
+    return fd;
 }
 
