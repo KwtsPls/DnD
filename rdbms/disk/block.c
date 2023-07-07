@@ -22,6 +22,18 @@ BlockAllocator *block_allocator_initialize(int size){
     return allocator;
 }
 
+//Function to destroy a block allocator
+void block_allocator_destroy(BlockAllocator *allocator){
+    for(int i=0;i<MAX_OPEN_FILES;i++){
+        if(allocator->files[i]!=NULL)
+            free(allocator->files[i]);
+    }
+    free(allocator->files);
+    free(allocator->fds);
+    buffer_manager_destroy(allocator->bufferManager);
+    free(allocator);
+}
+
 //Get the name of an open file
 char *block_file_name(BlockAllocator **allocator,int fd){
     for(int i=0;i<MAX_OPEN_FILES;i++){
@@ -80,8 +92,7 @@ Block *block_init(){
     Block *block = malloc(sizeof(Block));
     block->bit=0;
     block->block_number=-1;
-    block->byteArray = malloc(BLOCK_SIZE);
-    memset(block->byteArray,0,BLOCK_SIZE);
+    block->byteArray = NULL;
     return block;
 }
 
@@ -91,6 +102,7 @@ Block *block_allocate(BlockAllocator **allocator,int fd,Block *block){
     if(tell(fd)==0){
         block->block_number=0;
         block->bit=0;
+        block->byteArray = malloc(BLOCK_SIZE);
         memset(block->byteArray,0,BLOCK_SIZE);
 
         //Allocate disk space for a new block
@@ -99,6 +111,7 @@ Block *block_allocate(BlockAllocator **allocator,int fd,Block *block){
     else{
         block->block_number = tell(fd)/BLOCK_SIZE;
         block->bit=0;
+        block->byteArray = malloc(BLOCK_SIZE);
         memset(block->byteArray,0,BLOCK_SIZE);
 
         lseek(fd,0,SEEK_END);
@@ -106,7 +119,7 @@ Block *block_allocate(BlockAllocator **allocator,int fd,Block *block){
     }
     //Insert the new block into the buffer
     HashTableEntry *entry = hashtable_entry_create(block_file_name(allocator,fd),block->block_number);
-    (*allocator)->bufferManager = buffer_manager_insert((*allocator)->bufferManager,entry,&(block->byteArray));
+    (*allocator)->bufferManager = buffer_manager_insert((*allocator)->bufferManager,entry,block->byteArray);
 
     return block;
 }
@@ -141,21 +154,28 @@ int block_get(BlockAllocator **allocator,int fd,int block_number,Block **block){
 
     //Check if the block exists in the buffer - avoid seek if it exists
     char *byteArray = NULL;
-    buffer_manager_allocate((*allocator)->bufferManager,&byteArray, block_file_name(allocator,fd),block_number);
+    (*allocator)->bufferManager = buffer_manager_allocate((*allocator)->bufferManager,&byteArray, block_file_name(allocator,fd),block_number);
 
     //Block is not in memory - read from disk and insert the block to the buffer
     if(byteArray==NULL){
+        printf("SEEK FOR BLOCK %d\n",block_number);
         lseek(fd,BLOCK_SIZE*block_number,SEEK_SET);
         read(fd,(*block)->byteArray,BLOCK_SIZE);
         HashTableEntry *entry = hashtable_entry_create(block_file_name(allocator,fd),block_number);
-        (*allocator)->bufferManager = buffer_manager_insert((*allocator)->bufferManager,entry,&((*block)->byteArray));
+        (*allocator)->bufferManager = buffer_manager_insert((*allocator)->bufferManager,entry,(*block)->byteArray);
     }
     else{
+        printf("BLOCK %d IN BUFFER\n",block_number);
         (*block)->byteArray = byteArray;
     }
     (*block)->bit=0;
     (*block)->block_number = block_number;
 
     return 1;
+}
+
+//Function to free the memory of the block struct
+void block_destroy(Block *block){
+    free(block);
 }
 

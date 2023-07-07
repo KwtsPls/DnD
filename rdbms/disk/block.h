@@ -22,7 +22,9 @@ typedef struct block_allocator{
 
 /******** DATABASE FILE HELPER FUNCTIONS *************/
 //Function to initialize the functions of blocks/buffer
-BlockAllocator * block_allocator_initialize(int size);
+BlockAllocator *block_allocator_initialize(int size);
+//Function to destroy a block allocator
+void block_allocator_destroy(BlockAllocator *allocator);
 //Get the name of an open file
 char *block_file_name(BlockAllocator **allocator,int fd);
 //Function to create a new database file
@@ -48,6 +50,7 @@ Block *block_set_dirty(Block *block);
 void block_unpin(BlockAllocator **allocator,int fd, Block **block);
 //Function to return a specific block
 int block_get(BlockAllocator **allocator,int fd,int block_number,Block **block);
-
+//Function to free the memory of the block struct
+void block_destroy(Block *block);
 
 #endif //DND_BLOCK_H
