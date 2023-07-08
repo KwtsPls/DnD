@@ -116,7 +116,7 @@ send_button_clicked (GtkButton *button,
   query = g_string_new (gtk_text_buffer_get_text (buffer, &start, &end, FALSE));
   g_string_prepend (query, "QUERY: ");
 
-  gsize bytes_written = write_to_connection_str (leader_connection, query);
+  gsize bytes_written = write_to_connection_str (leader_connection, query->str);
 
   g_string_free (query, FALSE);
 
