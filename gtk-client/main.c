@@ -110,11 +110,15 @@ send_button_clicked (GtkButton *button,
 
   GtkTextIter start, end;
   GtkTextBuffer *buffer = gtk_text_view_get_buffer((GtkTextView *) QUERY_EDITOR (query_editor)->editor);
-  gchar *text;
-  gtk_text_buffer_get_bounds(buffer, &start, &end);
-  text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+  GString *query;
 
-  gsize bytes_written = write_to_connection_str (leader_connection, text);
+  gtk_text_buffer_get_bounds (buffer, &start, &end);
+  query = g_string_new (gtk_text_buffer_get_text (buffer, &start, &end, FALSE));
+  g_string_prepend (query, "QUERY: ");
+
+  gsize bytes_written = write_to_connection_str (leader_connection, query);
+
+  g_string_free (query, FALSE);
 
   printf ("Bytes written %d\n", bytes_written);
   if (bytes_written == -1)

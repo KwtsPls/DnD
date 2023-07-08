@@ -93,17 +93,31 @@ peer_main (gpointer data)
 
   while (TRUE)
     {
-      // after 20 loops (2s) of inactivity disconnect
-      gsize bytes_read = read_from_connection_str (connection, input); // check if read returns error on dc
+      gsize bytes_read = read_from_connection_str (connection, input);
       if (bytes_read > 0)
         {
           printf ("Got %lu bytes: %s\n", bytes_read, input);
-          write_to_connection_str (connection, input);
+          if (strncmp (input, "PING", 4) == 0)
+            {
+              write_to_connection_str (connection, "PING");
+            }
+          else if (strncmp (input, "COORDINATOR", 11) == 0)
+            {
+
+            }
+          else if (strncmp (input, "QUERY", 5) == 0)
+            {
+              if (self->is_leader == FALSE)
+                g_error ("Got a QUERY command without being the leader.");
+              printf("Query to execute:\n\t%s", input);
+            }
         }
-      printf("sleeping\n");
+      else if (ping (connection) == FALSE)
+        break;
       usleep (100000);
     }
 
+  printf ("Thread exiting\n");
   g_object_unref (connection);
 
   return NULL;
