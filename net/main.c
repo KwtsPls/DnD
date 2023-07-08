@@ -93,12 +93,15 @@ peer_main (gpointer data)
 
   while (TRUE)
     {
-      gsize bytes_read = read_from_connection_str (connection, input);
+      // after 20 loops (2s) of inactivity disconnect
+      gsize bytes_read = read_from_connection_str (connection, input); // check if read returns error on dc
       if (bytes_read > 0)
         {
           printf ("Got %lu bytes: %s\n", bytes_read, input);
           write_to_connection_str (connection, input);
         }
+      printf("sleeping\n");
+      usleep (100000);
     }
 
   g_object_unref (connection);
@@ -188,7 +191,7 @@ seniority_succession_algorithm (void)
     {
       Peer *p = lp->data;
       if (p->connection != NULL)
-        write_to_connection_str (p->connection, "COORDINATOR");
+        write_to_connection_str (p->connection, "COORDINATOR"); // TODO: The peers should check the ID.
     }
 
   printf ("Assuming leadership\n");
@@ -215,7 +218,6 @@ main (int    argc,
 
   context = g_option_context_new ("- node of the DnD distributed database");
   g_option_context_add_main_entries (context, entries, NULL);
-
   if (!g_option_context_parse (context, &argc, &argv, &error))
     g_error ("option parsing failed: %s\n", error->message);
 
