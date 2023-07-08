@@ -58,7 +58,10 @@ HashTableValue *hashtable_value_create(char *array,unsigned long priority){
 //Function to destroy a hash table value
 void hashtable_value_destroy(void *_value){
     HashTableValue *value = (HashTableValue*)_value;
-    free(value->array);
+    if(value->array!=NULL) {
+        free(value->array);
+        value->array = NULL;
+    }
     free(value);
 }
 

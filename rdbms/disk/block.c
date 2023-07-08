@@ -158,14 +158,14 @@ int block_get(BlockAllocator **allocator,int fd,int block_number,Block **block){
 
     //Block is not in memory - read from disk and insert the block to the buffer
     if(byteArray==NULL){
-        printf("SEEK FOR BLOCK %d\n",block_number);
         lseek(fd,BLOCK_SIZE*block_number,SEEK_SET);
+        (*block)->byteArray = malloc(BLOCK_SIZE);
+        memset((*block)->byteArray,0,BLOCK_SIZE);
         read(fd,(*block)->byteArray,BLOCK_SIZE);
         HashTableEntry *entry = hashtable_entry_create(block_file_name(allocator,fd),block_number);
         (*allocator)->bufferManager = buffer_manager_insert((*allocator)->bufferManager,entry,(*block)->byteArray);
     }
     else{
-        printf("BLOCK %d IN BUFFER\n",block_number);
         (*block)->byteArray = byteArray;
     }
     (*block)->bit=0;
