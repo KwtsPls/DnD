@@ -147,7 +147,7 @@ connect_with_peer (gpointer data)
 
   p->connection = NULL;
 
-  printf("Attempting to connect to: %s\n", p->address);
+  // printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
@@ -187,7 +187,8 @@ seniority_succession_algorithm (void)
   for (GList *lp = peers; lp != NULL; lp = lp->next)
     {
       Peer *p = lp->data;
-      write_to_connection_str (p->connection, "COORDINATOR");
+      if (p->connection != NULL)
+        write_to_connection_str (p->connection, "COORDINATOR");
     }
 
   printf ("Assuming leadership\n");
@@ -214,7 +215,7 @@ main (int    argc,
 
   context = g_option_context_new ("- node of the DnD distributed database");
   g_option_context_add_main_entries (context, entries, NULL);
-  g_option_context_add_group (context, gtk_get_option_group (TRUE));
+
   if (!g_option_context_parse (context, &argc, &argv, &error))
     g_error ("option parsing failed: %s\n", error->message);
 
