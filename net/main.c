@@ -45,8 +45,20 @@ client_main (gpointer data)
       if (bytes_read > 0)
         {
           printf ("Got %lu bytes: %s\n", bytes_read, input);
-          write_to_connection_str (connection, input);
+          if (strncmp (input, "PING", 4) == 0)
+            {
+              write_to_connection_str (connection, "PING");
+            }
+          else if (strncmp (input, "QUERY", 5) == 0)
+            {
+              if (self->is_leader == FALSE)
+                g_error ("Got a QUERY command without being the leader.");
+              printf("Query to execute:\n\t%s", input);
+            }
         }
+      else if (ping (connection) == FALSE)
+        break;
+      usleep (100000);
     }
 
   g_object_unref (connection);
