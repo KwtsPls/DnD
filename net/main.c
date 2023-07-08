@@ -147,7 +147,7 @@ connect_with_peer (gpointer data)
 
   p->connection = NULL;
 
-  // printf("Attempting to connect to: %s\n", p->address);
+  printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
@@ -179,7 +179,7 @@ seniority_succession_algorithm (void)
   for (GList *lp = peers; lp != NULL; lp = lp->next)
     {
       Peer *p = lp->data;
-      if (p->id != 0 && p->id < self->id)
+      if (p->connection != NULL && p->id < self->id)
         return; // I shouldn't be the leader
     }
 
