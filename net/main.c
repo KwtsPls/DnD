@@ -53,7 +53,11 @@ client_main (gpointer data)
             {
               if (self->is_leader == FALSE)
                 g_error ("Got a QUERY command without being the leader.");
-              printf("Query to execute:\n\t%s", input);
+              printf("Query to execute:\n\t%s\n", input);
+
+              // execute query
+
+              write_to_connection_str (connection, "Query Result");
             }
         }
       else if (ping (connection) == FALSE)
