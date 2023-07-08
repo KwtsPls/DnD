@@ -57,7 +57,10 @@ client_main (gpointer data)
 
               // execute query
 
-              write_to_connection_str (connection, "Query Result");
+              GString *result = g_string_new ("Query Results -> ");
+              g_string_append (result, input);
+              write_to_connection_str (connection, result->str);
+              g_string_free (result, FALSE);
             }
         }
       else if (ping (connection) == FALSE)
