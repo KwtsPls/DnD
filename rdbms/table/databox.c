@@ -31,6 +31,13 @@ char *databox_get_string(DataBox *databox){
     else return NULL;
 }
 
+//Compare a value with the data held in a databox
+int databox_compare_value(DataBox *databox,void *value){
+    if(databox->type==INT_MAX) return *(int*)databox->data - *(int*)value;
+    else if(databox->type==DOUBLE_BOX) return *(double*)databox->data - *(double*)value;
+    else return strcmp((char*)databox->data,(char*)value);
+}
+
 //Function to destroy a databox
 void databox_destroy(void *_databox){
     DataBox *databox = (DataBox*) _databox;

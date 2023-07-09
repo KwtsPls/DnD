@@ -12,9 +12,9 @@ typedef struct var{
     char *column;
 }Var;
 
-typedef struct table{
+typedef struct table_token{
     char *name;
-}Table;
+}TableToken;
 
 
 typedef struct expr{
@@ -68,12 +68,12 @@ Var *parse_var(Token *var_token,GList **tokens);
 //Function to parse a single aggregate
 Var *parse_aggr(Token *var_token,GList **tokens);
 //Function to parse a single table
-Table *parse_table(Token *table_token,GList **tokens);
+TableToken *parse_table(Token *table_token,GList **tokens);
 //Function to parse an expr of the form a op b
 Expr *parse_expr(GList **tokens);
 
 //Function to create a new table
-Table *table_create(char *name);
+TableToken *table_token_create(char *name);
 
 //Function to free a statement
 void statement_free(Statement *statement);

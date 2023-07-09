@@ -18,6 +18,8 @@ int databox_get_int(DataBox *databox);
 double databox_get_double(DataBox *databox);
 //Get data if databox holds a string
 char *databox_get_string(DataBox *databox);
+//Compare a value with the data held in a databox
+int databox_compare_value(DataBox *databox,void *value);
 
 //Function to destroy a databox
 void databox_destroy(void *_databox);

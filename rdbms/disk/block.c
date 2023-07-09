@@ -62,6 +62,7 @@ int block_file_open(BlockAllocator **allocator,char *filename){
             (*allocator)->fds[i]=fd;
             (*allocator)->files[i]=malloc(strlen(filename)+1);
             strcpy((*allocator)->files[i],filename);
+            break;
         }
     }
     return fd;

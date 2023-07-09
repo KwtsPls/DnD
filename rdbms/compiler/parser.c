@@ -320,7 +320,7 @@ Statement *parse_table_list(GList **tokens,Statement *statement){
         }
 
         Token *token = (Token*)g_list_pop(tokens);
-        Table *table = NULL;
+        TableToken *table = NULL;
         if(token->type==TABLE){
             table = parse_table(token,tokens);
         }
@@ -429,7 +429,7 @@ Expr *parse_expr(GList **tokens){
 }
 
 //Function to parse a single table
-Table *parse_table(Token *table_token,GList **tokens){
+TableToken *parse_table(Token *table_token,GList **tokens){
 
     if(g_list_length(*tokens)!=0) {
         Token *lookahead = (Token *) g_list_first(*tokens)->data;
@@ -440,7 +440,7 @@ Table *parse_table(Token *table_token,GList **tokens){
         }
     }
 
-    Table *table = table_create(table_token->data);
+    TableToken *table = table_token_create(table_token->data);
     token_free(table_token);
     return table;
 }
@@ -565,8 +565,8 @@ void *parse_expr_operand(Token *token,TokenType *type){
 }
 
 
-Table *table_create(char *name){
-    Table *table = malloc(sizeof(Table));
+TableToken *table_token_create(char *name){
+    TableToken *table = malloc(sizeof(TableToken));
     table->name = strdup(name);
     return table;
 }
@@ -667,7 +667,7 @@ void var_print(void *_var,void *extra){
 
 //Function to print a table
 void table_print(void *_table,void *extra){
-    Table *table = (Table*)_table;
+    TableToken *table = (TableToken*)_table;
     printf("%s ",table->name);
 }
 
@@ -722,7 +722,7 @@ void var_free(void *var){
 
 //Function to free a table
 void table_free(void *table){
-    Table *_table = (Table*)table;
+    TableToken *_table = (TableToken*)table;
     free(_table->name);
     free(_table);
 }

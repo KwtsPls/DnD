@@ -18,6 +18,8 @@ Record *record_add_field(Record *r,DataBox *databox);
 int record_size(Record *r);
 //Function to return the fields of the record as an array
 DataBox **record_as_array(Record *r,int *size);
+//Function to return the value of certain field
+void *record_get_field_value(Record *r,int pos);
 //Function to print a record
 void record_print(Record *r);
 //Function to destroy a record

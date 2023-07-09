@@ -35,6 +35,17 @@ DataBox **record_as_array(Record *r,int *size){
     return array;
 }
 
+//Function to return the value of certain field
+void *record_get_field_value(Record *r,int pos){
+    int n = g_list_length(r->list);
+    for(int i=0;i<n;i++){
+        DataBox *databox = (DataBox*)g_list_nth(r->list,i)->data;
+        if(pos==i)
+            return databox;
+    }
+    return NULL;
+}
+
 //Function to print a record
 void record_print(Record *r){
     int n = g_list_length(r->list);
