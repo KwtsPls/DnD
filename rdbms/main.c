@@ -2,15 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <glib.h>
+#include "./compiler/tokenizer.h"
 #include "./compiler/parser.h"
+#include "./compiler/semantic.h"
 #include "./disk/block.h"
 #include "./db_files/heapfile.h"
-
-typedef struct {
-    BlockAllocator *allocator;
-    Table *table;
-    int fd;
-}  DBFile;
+#include "./db_files/db_file.h"
 
 DBFile* load_db_file(char* filepath) {
     DBFile *db_file = malloc(sizeof(DBFile));
@@ -45,10 +42,23 @@ GList* load_db(char* dir_path) {
 int main(int argc, char **argv){
     GList *files = load_db ("./data");
 
-    for (GList *lp = files; lp != NULL; lp = lp->next) {
-        DBFile *db_file = lp->data;
-        table_print (db_file->table, NULL);
-    }
+//    for (GList *lp = files; lp != NULL; lp = lp->next) {
+//        DBFile *db_file = lp->data;
+//        table_print (db_file->table, NULL);
+//    }
 
-    return 0;
+    gchar *query = "SELECT customer.name FROM customer";
+
+    printf("Executing query:\n\t%s\t\n", query);
+
+    GList *tokens = tokenize(query);
+    Statement *stm = parse_statement(&tokens);
+    gboolean is_valid = smemantic_analyze (stm, files);
+
+//    if (is_valid)
+//        printf("\nValid query!\n");
+//    else
+//        printf("\nInvalid query!\n");
+
+    return is_valid;
 }
