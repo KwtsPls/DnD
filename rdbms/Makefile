@@ -14,11 +14,17 @@ LDLIBS = $(shell pkg-config --libs glib-2.0)
 
 # set the name of the executable file to compile here
 PROGRAM = main
-OBJS = main.o ./compiler/tokenizer.o ./compiler/parser.o ./disk/block.o ./memory/buffer_manager.o ./memory/priority_queue.o ./table/databox.o ./table/record.o ./table/table.o ./db_files/heapfile.o ./db_files/result_file.o
+OBJS = main.o ./compiler/tokenizer.o ./compiler/parser.o ./disk/block.o ./memory/buffer_manager.o ./memory/priority_queue.o ./table/databox.o ./table/record.o ./table/table.o ./table/result_set.o ./db_files/heapfile.o ./db_files/result_file.o
+
+PROGRAM_CREATE = create_files
+OBJS_CREATE = create_files.o ./compiler/tokenizer.o ./compiler/parser.o ./disk/block.o ./memory/buffer_manager.o ./memory/priority_queue.o ./table/databox.o ./table/record.o ./table/table.o ./table/result_set.o ./db_files/heapfile.o ./db_files/result_file.o
 
 
 $(PROGRAM): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(PROGRAM) $(LDLIBS)
 
+$(PROGRAM_CREATE): $(OBJS_CREATE)
+	$(CC) $(CFLAGS) $(OBJS_CREATE) $(LDFLAGS) -o $(PROGRAM_CREATE) $(LDLIBS)
+
 clean:
-	rm $(PROGRAM) $(OBJS)
+	rm $(PROGRAM) $(OBJS) $(PROGRAM_CREATE) $(OBJS_CREATE)

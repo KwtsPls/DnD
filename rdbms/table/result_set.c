@@ -15,7 +15,6 @@ ResultSet *result_set_create(){
 //Function to initialize a result item
 ResultItem *result_item_create(){
     ResultItem *item = malloc(sizeof(ResultItem));
-    item->size=0;
     item->records=NULL;
     return item;
 }
@@ -23,7 +22,7 @@ ResultItem *result_item_create(){
 //Function to add a table to the result set
 ResultSet *result_set_add_table(ResultSet *set,Table *table){
     if(g_list_find(set->tables,table)==NULL)
-        set->tables = g_list_append(table);
+        set->tables = g_list_append(set->tables, table);
     return set;
 }
 
@@ -35,7 +34,7 @@ ResultSet *result_set_add_item(ResultSet *set,ResultItem *item){
 
 //Function to add a record for a different table to the item
 ResultItem *result_item_add_record(ResultItem *item,Record *record){
-    item->records = g_list_append(item,record);
+    item->records = g_list_append(item->records,record);
     return item;
 }
 

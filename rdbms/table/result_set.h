@@ -2,6 +2,8 @@
 #define DND_RESULT_SET_H
 
 #include <glib.h>
+#include "table.h"
+#include "record.h"
 
 typedef struct result_stream{
     GList *records;
