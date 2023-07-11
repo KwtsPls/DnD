@@ -11,7 +11,6 @@
 #include "../db_files/heapfile.h"
 
 //Function to perform a block nested loop join on heap files
-HPErrorCode heap_file_bnl(BlockAllocator **allocator,Table **table1,Table **table2,TokenType op);
-
+ResultSet *heap_file_bnl(BlockAllocator **allocator,Table **table1,Table **table2,char *field1,char *field2,TokenType op);
 
 #endif //DND_BNL_H

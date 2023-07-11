@@ -217,7 +217,7 @@ HPErrorCode heap_file_close(BlockAllocator **allocator,int fd,Table **table){
 //Perform a filter operation on the records of the table
 ResultSet *heap_file_filter(BlockAllocator **allocator,Table **table,char *field,TokenType op,void *value){
     int field_pos= table_field_pos(*table,field);
-    if(field_pos==-1) return HP_FILTER_FIELD_ERROR;
+    if(field_pos==-1) return NULL;
 
     int fd = (*table)->fd;
 
@@ -241,14 +241,15 @@ ResultSet *heap_file_filter(BlockAllocator **allocator,Table **table,char *field
                 item = result_item_add_record(item,r);
                 set = result_set_add_item(set,item);
             }
+            else{
+                record_destroy(r);
+            }
 
         }
         block_unpin(allocator,fd,&block);
     }
 
-    *file_descriptor = rfd;
     block_destroy(block);
-    free(filename);
     return set;
 }
 

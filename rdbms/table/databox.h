@@ -20,7 +20,14 @@ double databox_get_double(DataBox *databox);
 char *databox_get_string(DataBox *databox);
 //Compare a value with the data held in a databox
 int databox_compare_value(DataBox *databox,void *value);
-
+//Compare two databoxes
+int databox_compare(DataBox *databox1,DataBox *databox2);
+//Function make a deep copy of a databox
+void *databox_copy(const void *_databox,void *extra);
+//Function to sum on a databoxes
+DataBox *databox_sum(DataBox *databox,DataBox *sum);
+//Function to count on a data box
+DataBox *databox_count(DataBox *databox);
 //Function to destroy a databox
 void databox_destroy(void *_databox);
 

@@ -46,6 +46,20 @@ void *record_get_field_value(Record *r,int pos){
     return NULL;
 }
 
+//Function to compare two records
+int record_compare(Record *r1,Record *r2){
+    if(g_list_length(r1->list)!=g_list_length(r2->list)) return 0;
+    if(r1->size != r2->size) return 0;
+
+    for(int i=0;i<g_list_length(r1->list);i++){
+        DataBox *databox1 = (DataBox*)g_list_nth(r1->list,i)->data;
+        DataBox *databox2 = (DataBox*)g_list_nth(r2->list,i)->data;
+        if(databox_compare(databox1,databox2)!=0) return 0;
+    }
+
+    return 1;
+}
+
 //Function to print a record
 void record_print(Record *r){
     int n = g_list_length(r->list);
@@ -55,11 +69,42 @@ void record_print(Record *r){
         else if (databox->type==DOUBLE_BOX) printf("%f ",*(double *)databox->data);
         else printf("%s ",(char *)databox->data);
     }
-    printf("\n");
+    printf(" ");
+}
+
+//Function to sort a record list based on a field value
+int record_compare_asc(const void *a,const void *b,void *extra){
+    Record *ra = (Record*)a;
+    Record *rb = (Record*)b;
+    int i = *(int*)extra;
+    DataBox *databoxa = record_get_field_value(ra,i);
+    DataBox *databoxb = record_get_field_value(rb,i);
+    return databox_compare(databoxa,databoxb);
+}
+
+//Function to sort a record list based on a field value
+int record_compare_desc(const void *a,const void *b,void *extra){
+    Record *ra = (Record*)a;
+    Record *rb = (Record*)b;
+    int i = *(int*)extra;
+    DataBox *databoxa = record_get_field_value(ra,i);
+    DataBox *databoxb = record_get_field_value(rb,i);
+    return -databox_compare(databoxa,databoxb);
+}
+
+//Function to perform a deep copy of a record
+void *record_copy(const void *_r,void *extra){
+    Record *r = (Record*)_r;
+    Record *copy = malloc(sizeof(Record));
+    copy->size = r->size;
+    copy->list = g_list_copy_deep(r->list,databox_copy,NULL);
+    return copy;
 }
 
 //Function to destroy a record
-void record_destroy(Record *r){
+void record_destroy(void *_r){
+    if(_r==NULL) return;
+    Record *r = (Record*)_r;
     g_list_free_full(r->list, databox_destroy);
     free(r);
 }
