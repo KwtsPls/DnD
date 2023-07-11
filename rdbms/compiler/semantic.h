@@ -4,6 +4,6 @@
 #include <glib.h>
 #include "parser.h"
 
-gboolean smemantic_analyze (Statement *stm, GList *db_files);
+gboolean smemantic_analyze (Statement *stm, GList *tables);
 
 #endif //_SEMANTIC_H_

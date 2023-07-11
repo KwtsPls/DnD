@@ -228,7 +228,7 @@ int result_entry_equals(const void *_a,const void *_b){
 /*###########################################################################*/
 
 //Function to prepare the result according to the variables in the select
-GList *result_set_finalize(ResultSet *set,Statement *statement,GList *db_files){
+GList *result_set_finalize(ResultSet *set,Statement *statement,GList *tables){
     GList *result=NULL;
 
     //check if the statement has a group by field
@@ -237,10 +237,10 @@ GList *result_set_finalize(ResultSet *set,Statement *statement,GList *db_files){
 
         //Find the table involved in the group by
         Table *table;
-        for(GList *lp = db_files; lp != NULL; lp = lp->next){
-            DBFile *dbFile = (DBFile*)lp->data;
-            if(strcmp(var->table,dbFile->table->name)==0){
-                table = dbFile->table;
+        for(GList *lp = tables; lp != NULL; lp = lp->next){
+            Table *table1 = (Table*)lp->data;
+            if(strcmp(var->table,table1->name)==0){
+                table = table1;
                 break;
             }
         }
@@ -277,10 +277,10 @@ GList *result_set_finalize(ResultSet *set,Statement *statement,GList *db_files){
                 Var *result_var = (Var*)lp->data;
 
                 //Find the table involved in the group by
-                for(GList *lp1 = db_files; lp1 != NULL; lp1 = lp1->next){
-                    DBFile *dbFile = (DBFile*)lp1->data;
-                    if(strcmp(result_var->table,dbFile->table->name)==0){
-                        table = dbFile->table;
+                for(GList *lp1 = tables; lp1 != NULL; lp1 = lp1->next){
+                    Table *table1 = (Table*)lp1->data;
+                    if(strcmp(result_var->table,table1->name)==0){
+                        table = table1;
                         break;
                     }
                 }
@@ -323,10 +323,10 @@ GList *result_set_finalize(ResultSet *set,Statement *statement,GList *db_files){
                 Var *result_var = (Var*)lp->data;
 
                 //Find the table involved in the group by
-                for(GList *lp1 = db_files; lp1 != NULL; lp1 = lp1->next){
-                    DBFile *dbFile = (DBFile*)lp1->data;
-                    if(strcmp(result_var->table,dbFile->table->name)==0){
-                        table = dbFile->table;
+                for(GList *lp1 = tables; lp1 != NULL; lp1 = lp1->next){
+                    Table *table1 = (Table*)lp1->data;
+                    if(strcmp(result_var->table,table1->name)==0){
+                        table = table1;
                         break;
                     }
                 }

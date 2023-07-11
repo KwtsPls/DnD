@@ -16,7 +16,6 @@ typedef struct table_token{
     char *name;
 }TableToken;
 
-
 typedef struct expr{
     TokenType x_type;
     void *x;

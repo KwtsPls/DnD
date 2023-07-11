@@ -9,6 +9,8 @@
 #include "../table/table.h"
 #include "../table/result_set.h"
 
+typedef struct result_set ResultSet;
+
 typedef enum hp_error_codes{HP_OK,
                             HP_FILE_ERROR,
                             HP_CLOSE_ERROR,

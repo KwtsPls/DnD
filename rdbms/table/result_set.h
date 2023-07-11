@@ -50,7 +50,7 @@ ResultItem *result_item_get_records(ResultItem *item1,ResultItem *item2);
 //Function to prepare the result according to the variables in the select
 
 /*********** OPERATIONS ON THE RESULT SET *****************************/
-GList *result_set_finalize(ResultSet *set,Statement *statement,GList *db_files);
+GList *result_set_finalize(ResultSet *set,Statement *statement,GList *tables);
 
 //Function to delete a result
 void result_set_destroy(void *_set);
