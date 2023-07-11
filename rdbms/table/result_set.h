@@ -2,10 +2,10 @@
 #define DND_RESULT_SET_H
 
 #include <glib.h>
-#include "../table/table.h"
 #include "../compiler/parser.h"
-#include "record.h"
 #include "../db_files/db_file.h"
+#include "table.h"
+#include "record.h"
 
 typedef struct result_stream{
     GList *records;
