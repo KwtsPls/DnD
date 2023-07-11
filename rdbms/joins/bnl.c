@@ -20,6 +20,9 @@ ResultSet *heap_file_bnl(BlockAllocator **allocator,Table **table1,Table **table
     int size1 = (*table1)->record_size;
     int size2 = (*table2)->record_size;
 
+    //Create a new result set for the join
+    ResultSet *set = result_set_create();
+
     //Inner table must have fewer blocks
     if(right_block_num>left_block_num){
         int t = fd1;
@@ -41,12 +44,14 @@ ResultSet *heap_file_bnl(BlockAllocator **allocator,Table **table1,Table **table
         GList *lt = f1;
         f1 = f2;
         f2 = lt;
-    }
 
-    //Create a new result set for the join
-    ResultSet *set = result_set_create();
-    set = result_set_add_table(set,*table1);
-    set = result_set_add_table(set,*table2);
+        set = result_set_add_table(set,*table2);
+        set = result_set_add_table(set,*table1);
+    }
+    else{
+        set = result_set_add_table(set,*table1);
+        set = result_set_add_table(set,*table2);
+    }
 
     Block *block1 = block_init();
     Block *block2 = block_init();

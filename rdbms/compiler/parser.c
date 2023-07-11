@@ -120,6 +120,7 @@ Statement *parse_order_clause(GList **tokens,Statement *statement) {
         var->table = strdup(t);
         t = strtok(NULL,".");
         var->column = strdup(t);
+        free(data);
     }
     else if(token->type==COUNT || token->type==SUM){
         if(g_list_length(*tokens)>=3) {

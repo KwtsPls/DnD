@@ -20,10 +20,24 @@ ResultItem *result_item_create(){
     return item;
 }
 
+//Function to print a result item
+void result_item_print(ResultItem *item){
+    printf("(");
+    for(GList *lp1 = item->records; lp1 != NULL; lp1 = lp1->next) {
+        Record *r = lp1->data;
+        record_print(r);
+    }
+    printf(")\n");
+}
+
 //Function to add a table to the result set
 ResultSet *result_set_add_table(ResultSet *set,Table *table){
-    if(g_list_find(set->tables,table)==NULL)
-        set->tables = g_list_append(set->tables,table);
+    for (GList *lp1 = set->tables; lp1 != NULL; lp1 = lp1->next) {
+        Table *t = ((Table *) lp1->data);
+        if (strcmp(t->name, table->name)==0)
+            return set;
+    }
+    set->tables = g_list_append(set->tables,table);
     return set;
 }
 
@@ -55,6 +69,7 @@ ResultItem *result_item_add_record(ResultItem *item,Record *record){
 ResultSet *result_set_and(ResultSet *set1,ResultSet *set2){
     //Check the result set tables to find the index of the intersection
     ResultSet *set = result_set_create();
+    set->tables = g_list_copy(set1->tables);
     GList *indexes = NULL;
     int i=0;
     for (GList *lp1 = set1->tables; lp1 != NULL; lp1 = lp1->next) {
@@ -62,19 +77,20 @@ ResultSet *result_set_and(ResultSet *set1,ResultSet *set2){
             Table *t1 = lp1->data;
             Table *t2 = lp2->data;
             if (strcmp(t1->name,t2->name)==0) {
-                set = result_set_add_table(set,(Table*)lp1->data);
                 int *data = malloc(sizeof(int));
                 *data = i;
                 indexes = g_list_append(indexes,data);
                 break;
+            }
+            else{
+                set = result_set_add_table(set,t2);
             }
         }
         i++;
     }
 
     //if there is no common table - perform a cross join
-    if(set->tables==NULL){
-        set->tables = g_list_copy(set1->tables);
+    if(indexes==NULL){
         set->tables = g_list_concat(set->tables,g_list_copy(set2->tables));
 
         for (GList *lp1 = set1->results; lp1 != NULL; lp1 = lp1->next) {
@@ -90,8 +106,6 @@ ResultSet *result_set_and(ResultSet *set1,ResultSet *set2){
         return set;
     }
     else{
-        set->tables = g_list_concat(g_list_copy(set2->tables),set->tables);
-
         for (GList *lp1 = set1->results; lp1 != NULL; lp1 = lp1->next) {
             for (GList *lp2 = set2->results; lp2 != NULL; lp2 = lp2->next){
                 ResultItem *item1 = (ResultItem*)lp1->data;
@@ -99,7 +113,6 @@ ResultSet *result_set_and(ResultSet *set1,ResultSet *set2){
                 ResultItem *item = result_item_intersection(item1,item2,indexes);
                 if(item!=NULL){
                     set = result_set_add_item(set,item);
-                    break;
                 }
             }
         }
@@ -132,8 +145,8 @@ ResultItem *result_item_intersection(ResultItem *item1,ResultItem *item2,GList *
     }
     else{
         ResultItem *item = result_item_create();
-        item->records = g_list_copy_deep(item2->records, record_copy, NULL);
-        item = result_item_get_records(item,item1);
+        item->records = g_list_copy_deep(item1->records, record_copy, NULL);
+        item = result_item_get_records(item,item2);
         return item;
     }
 }
@@ -266,8 +279,11 @@ GList *result_set_finalize(ResultSet *set,Statement *statement,GList *tables){
             g_hash_table_insert(group_table,key,value_list);
         }
 
-        GList *keys = g_hash_table_get_keys(group_table);
-        GList *values = g_hash_table_get_values(group_table);
+        GList *keys_list = g_hash_table_get_keys(group_table);
+        GList *values_list = g_hash_table_get_values(group_table);
+
+        GList *keys = keys_list;
+        GList *values = values_list;
         while(keys!=NULL){
             ResultEntry *record_entry = (ResultEntry*)keys->data;
             GList *group_values = (GList*)values->data;
@@ -310,6 +326,9 @@ GList *result_set_finalize(ResultSet *set,Statement *statement,GList *tables){
             keys = keys->next;
             values = values->next;
         }
+        g_list_free_full(keys_list,result_value_nothing);
+        g_list_free_full(values_list,result_value_nothing);
+        g_hash_table_destroy(group_table);
     }
     else{
 

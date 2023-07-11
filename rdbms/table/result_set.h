@@ -29,6 +29,8 @@ ResultEntry *result_entry_create(ResultItem *item,int i,int j);
 ResultSet *result_set_create();
 //Function to initialize a result item
 ResultItem *result_item_create();
+//Function to print a result item
+void result_item_print(ResultItem *item);
 //Function to add a table to the result set
 ResultSet *result_set_add_table(ResultSet *set,Table *table);
 //Function to add a table to the result set

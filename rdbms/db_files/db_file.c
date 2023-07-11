@@ -27,9 +27,10 @@ GList* load_db(char* dir_path,BlockAllocator **allocator) {
             GString *filepath = g_string_new ("./data/");
             g_string_append (filepath, filename);
             tables = g_list_append (tables, load_db_file (filepath->str,allocator));
-            g_string_free (filepath, FALSE);
+            g_string_free (filepath, TRUE);
         }
     }
+    g_dir_close(dir);
     return tables;
 }
 
@@ -57,6 +58,11 @@ GList *database_query(Database *db,char *query){
     //Compiler part of the query pipeline
     GList *tokens = tokenize(query);
     Statement *stm = parse_statement(&tokens);
+    if(stm==NULL){
+        g_list_free_full(tokens, token_free);
+        return NULL;
+    }
+
     gboolean is_valid = smemantic_analyze(stm, db->tables);
 
     if(!is_valid){
@@ -88,10 +94,10 @@ GList *database_query(Database *db,char *query){
         else{
             ResultSet *set1 = NULL;
             if(join==0)
-                set = heap_file_filter(&db->allocator,&table1,field1,op,data);
+                set1 = heap_file_filter(&db->allocator,&table1,field1,op,data);
             else {
                 Table *table2 = (Table*)data;
-                set = heap_file_bnl(&db->allocator, &table1, &table2,field1,field2,op);
+                set1 = heap_file_bnl(&db->allocator, &table1, &table2,field1,field2,op);
             }
             set = result_set_and(set,set1);
         }
@@ -148,13 +154,13 @@ int decide_expression(Database *db,Expr *expr,Table **table1,void **value,char *
             Var *x = (Var*)expr->x;
             *field1 = x->column;
             *table1 = database_get_table(db,x->table);
-            *value = ((Token*)expr->y)->data;
+            *value = expr->y;
         }
         else{
             Var *y = (Var*)expr->y;
             *field1 = y->column;
             *table1 = database_get_table(db,y->table);
-            *value = ((Token*)expr->x)->data;
+            *value = expr->x;
         }
         return 0;
     }
