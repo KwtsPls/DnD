@@ -30,6 +30,8 @@ int record_compare_asc(const void *a,const void *b,void *extra);
 int record_compare_desc(const void *a,const void *b,void *extra);
 //Function to print a record
 void record_print(Record *r);
+//Function to convert a record to a GString
+GString* record_to_string(Record *r);
 //Function to destroy a record
 void record_destroy(void *_r);
 

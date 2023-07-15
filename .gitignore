@@ -1,2 +1,13 @@
-.idea
-*.o
+# Αγνοούμε όλα τα αρχεία (όχι τα directories)
+*
+!*/
+
+# Εκτός από τα παρακάτω
+!*.c
+!*.h
+!./rdbms/data/
+!Makefile
+!.gitignore
+!README.md
+!.vscode/*.json
+!CMakeLists.txt

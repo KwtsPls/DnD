@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include "../utils/networking_utils.h"
+#include "../rdbms/db_files/db_file.h"
+#include "../rdbms/table/record.h"
+
+static Database *db;
 
 typedef struct {
   gchar *address;
@@ -33,6 +37,17 @@ peer_delete (Peer *p)
 GList *peers = NULL;
 Peer *self = NULL;
 
+GString*
+records_list_to_string (GList *records)
+{
+  GString *s = g_string_new ("");
+  for (GList *lp = records; lp != NULL; lp = lp->next)
+    {
+      Record *r = lp->data;
+      record_print (r);
+    }
+}
+
 gpointer
 client_main (gpointer data)
 {
@@ -56,6 +71,12 @@ client_main (gpointer data)
               printf("Query to execute:\n\t%s\n", input);
 
               // execute query
+              GList *results = database_query (db, input + 7);
+              for (GList *lp = results; lp != NULL; lp = lp->next)
+                {
+                  Record *r = lp->data;
+                  record_print (r);
+                }
 
               GString *result = g_string_new ("Query Results -> ");
               g_string_append (result, input);
@@ -232,10 +253,12 @@ seniority_succession_algorithm (void)
 }
 
 static gchar *servers_filepath = NULL;
+static gchar *database_filepath = NULL;
 
 static GOptionEntry entries[] =
     {
-        { "addresses", 'a', 0, G_OPTION_ARG_STRING, &servers_filepath, "Filepath containing the addresses of the servers used in the system", NULL },
+        { "addresses", 'a', 0, G_OPTION_ARG_STRING, &servers_filepath, "File containing the addresses of the servers used in the system.", NULL },
+        { "database", 'd', 0, G_OPTION_ARG_STRING, &database_filepath, "Directory containing the database files.",                         NULL },
         { NULL }
     };
 
@@ -256,6 +279,11 @@ main (int    argc,
 
   if (servers_filepath == NULL)
     g_error ("please provide a server file.\n");
+
+  if (database_filepath == NULL)
+    g_error ("please provide a database directory.\n");
+
+  db = database_open (database_filepath);
 
   FILE * fp;
   char * line = NULL;

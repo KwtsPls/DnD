@@ -62,14 +62,23 @@ int record_compare(Record *r1,Record *r2){
 
 //Function to print a record
 void record_print(Record *r){
-    int n = g_list_length(r->list);
-    for(int i=0;i<n;i++) {
-        DataBox *databox = (DataBox*)g_list_nth(r->list,i)->data;
-        if(databox->type==INT_BOX) printf("%d ",*(int*)databox->data);
-        else if (databox->type==DOUBLE_BOX) printf("%f ",*(double *)databox->data);
-        else printf("%s ",(char *)databox->data);
+    GString *s = record_to_string (r);
+    printf("%s", s->str);
+    g_string_free (s, TRUE);
+}
+
+//Function to print a record
+GString* record_to_string(Record *r){
+  GString *s = g_string_new ("");
+  int n = g_list_length(r->list);
+  for(int i=0;i<n;i++) {
+      DataBox *databox = (DataBox*)g_list_nth(r->list,i)->data;
+      if(databox->type==INT_BOX) g_string_append_printf(s, "%d ",*(int*)databox->data);
+      else if (databox->type==DOUBLE_BOX) g_string_append_printf(s, "%f ",*(double *)databox->data);
+      else g_string_append_printf(s, "%s ",(char *)databox->data);
     }
-    printf(" ");
+  g_string_append_printf(s, " ");
+  return s;
 }
 
 //Function to sort a record list based on a field value

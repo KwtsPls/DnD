@@ -24,7 +24,7 @@ GList* load_db(char* dir_path,BlockAllocator **allocator) {
     dir = g_dir_open(dir_path, 0, NULL);
     while ((filename = g_dir_read_name(dir))) {
         if (strrchr(filename, '.') == NULL) { // checks for the existence of '.' in the filename
-            GString *filepath = g_string_new ("./data/");
+            GString *filepath = g_string_new (dir_path);
             g_string_append (filepath, filename);
             tables = g_list_append (tables, load_db_file (filepath->str,allocator));
             g_string_free (filepath, TRUE);
