@@ -52,9 +52,18 @@ Database *database_open(char* dir_path){
     return db;
 }
 
+
+//Function to add records of new tables to the database
 Database *database_open_existing(Database *db, char* dir_path){
-    GList *tables = load_db(dir_path,&db->allocator);
-    db->tables = g_list_concat (db->tables, tables);
+    GList *new_tables = load_db(dir_path,&db->allocator);
+    for(GList *node = new_tables; node != NULL; node = node->next){
+        Table *table_new = node->data;
+        Table *table_old = database_get_table(db,table_new->name);
+        heap_file_merge(&db->allocator,&table_old,&table_new);
+        heap_file_close(&db->allocator, table_new->fd,&table_new);
+    }
+
+    g_list_free_full(new_tables,database_table_destroy);
     return db;
 }
 

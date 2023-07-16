@@ -31,6 +31,8 @@ HPErrorCode heap_file_close(BlockAllocator **allocator,int fd,Table **table);
 ResultSet *heap_file_filter(BlockAllocator **allocator,Table **table,char *field,TokenType op,void *value);
 //Function to return all records in the table
 ResultSet *heap_file_scan(BlockAllocator **allocator,Table **table);
+//Function to merge two heap files
+void heap_file_merge(BlockAllocator **allocator,Table **table1,Table **table2);
 
 /************ HELPER FUNCTIONS ******************/
 //Function to write a record inside a block

@@ -13,6 +13,7 @@ typedef struct db{
 
 //Function to initialize a database
 Database *database_open(char* dir_path);
+//Function to add records of new tables to the database
 Database *database_open_existing(Database *db, char* dir_path);
 //Function to execute a query - returns a list of records
 GList *database_query(Database *db,char *query);

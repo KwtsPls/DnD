@@ -282,6 +282,29 @@ ResultSet *heap_file_scan(BlockAllocator **allocator,Table **table){
     return set;
 }
 
+//Function to merge two heap files
+void heap_file_merge(BlockAllocator **allocator,Table **table1,Table **table2){
+    int fd1 = (*table1)->fd;
+    int fd2 = (*table2)->fd;
+
+    //Get the number of blocks in the file
+    int blocks_num = tell(fd2)/BLOCK_SIZE;
+    Block *block = block_init();
+
+    for(int i=3;i<blocks_num;i++){
+        block_get(allocator,fd2,i,&block);
+        int offset = block->byteArray[0];
+        for(int j=0;j<offset;j++){
+            Record *r = heap_file_map_record(block,(*table2)->fields,j,(*table2)->record_size);
+            heap_file_insert(allocator,r,fd1);
+            record_destroy(r);
+        }
+        block_unpin(allocator,fd2,&block);
+    }
+
+    block_destroy(block);
+}
+
 /************ HELPER FUNCTIONS ******************/
 //Function to write a record inside a block
 void heap_file_write_record(Block *block,Record *r,int offset){

@@ -10,11 +10,9 @@
 #include "./db_files/db_file.h"
 
 int main(int argc, char **argv){
-    Database *database = database_open("./data/data1/");
-    database = database_open_existing (database, "./data/data0/");
-    database = database_open_existing (database, "./data/data2/");
-    database = database_open_existing (database, "./data/data3/");
-    GList *records = database_query(database,"SELECT customer.id FROM customer  WHERE customer.surname='Pesilda' LIMIT 10");
+    Database *database = database_open("./data/data0/");
+    database = database_open_existing(database,"./data/data1/");
+    GList *records = database_query(database,"SELECT COUNT(customer.id) FROM customer  WHERE customer.id>0");
     for(GList *node = records; node != NULL; node = node->next){
         Record *r = (Record*)node->data;
         record_print(r);
