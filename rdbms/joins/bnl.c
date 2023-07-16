@@ -56,6 +56,10 @@ ResultSet *heap_file_bnl(BlockAllocator **allocator,Table **table1,Table **table
     Block *block1 = block_init();
     Block *block2 = block_init();
 
+    int in_memory_join=0;
+    if(buffer_manager_available_space((*allocator)->bufferManager) > right_block_num + 1)
+        in_memory_join=1;
+
     for(int i=3;i<left_block_num;i++){
         block_get(allocator,fd1,i,&block1);
         char offset1 = block1->byteArray[0];
@@ -80,9 +84,17 @@ ResultSet *heap_file_bnl(BlockAllocator **allocator,Table **table1,Table **table
                     }
                 }
             }
-            block_unpin(allocator,fd2,&block2);
+            if(in_memory_join==0)
+                block_unpin(allocator,fd2,&block2);
         }
         block_unpin(allocator,fd1,&block1);
+    }
+
+    if(in_memory_join==1){
+        for(int i=3;i<right_block_num;i++){
+            block2->block_number=i;
+            block_unpin(allocator,fd2,&block2);
+        }
     }
 
     block_destroy(block1);

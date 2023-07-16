@@ -253,6 +253,35 @@ ResultSet *heap_file_filter(BlockAllocator **allocator,Table **table,char *field
     return set;
 }
 
+//Function to return all records in the table
+ResultSet *heap_file_scan(BlockAllocator **allocator,Table **table){
+
+    int fd = (*table)->fd;
+
+    //Get the number of blocks in the file
+    int blocks_num = tell(fd)/BLOCK_SIZE;
+    Block *block = block_init();
+
+    //Create a result stream
+    ResultSet *set = result_set_create();
+    set = result_set_add_table(set,*table);
+
+    for(int i=3;i<blocks_num;i++){
+        block_get(allocator,fd,i,&block);
+        int offset = block->byteArray[0];
+        for(int j=0;j<offset;j++){
+            Record *r = heap_file_map_record(block,(*table)->fields,j,(*table)->record_size);
+            ResultItem *item = result_item_create();
+            item = result_item_add_record(item,r);
+            set = result_set_add_item(set,item);
+        }
+        block_unpin(allocator,fd,&block);
+    }
+
+    block_destroy(block);
+    return set;
+}
+
 /************ HELPER FUNCTIONS ******************/
 //Function to write a record inside a block
 void heap_file_write_record(Block *block,Record *r,int offset){

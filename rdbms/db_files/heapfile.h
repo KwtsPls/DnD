@@ -29,6 +29,8 @@ HPErrorCode heap_file_close(BlockAllocator **allocator,int fd,Table **table);
 /*************** DATABASE OPERATIONS ON HEAP FILES *****************/
 //Perform a filter operation on the records of the table
 ResultSet *heap_file_filter(BlockAllocator **allocator,Table **table,char *field,TokenType op,void *value);
+//Function to return all records in the table
+ResultSet *heap_file_scan(BlockAllocator **allocator,Table **table);
 
 /************ HELPER FUNCTIONS ******************/
 //Function to write a record inside a block

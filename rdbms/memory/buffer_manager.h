@@ -49,6 +49,8 @@ BufferManager *buffer_manager_set_inactive(BufferManager *bufferManager,char *fi
 BufferManager *buffer_manager_insert(BufferManager *bufferManager,HashTableEntry *entry,char *array);
 //Function to return an entry if it exists in memory - or insert it
 BufferManager *buffer_manager_allocate(BufferManager *bufferManager,char **byteArray,char *filename,int block_num);
+//Function to return the available space in a buffer manager
+int buffer_manager_available_space(BufferManager *bufferManager);
 //Function to destroy the buffer manager
 void buffer_manager_destroy(BufferManager *bufferManager);
 

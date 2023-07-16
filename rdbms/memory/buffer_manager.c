@@ -109,7 +109,8 @@ BufferManager *buffer_manager_set_inactive(BufferManager *bufferManager,char *fi
 
     //Current block is set as candidate for removal
     value->active=0;
-    bufferManager->pq = pq_sorted_insert(bufferManager->pq,entry,value->priority);
+    bufferManager->pq = pq_insert(bufferManager->pq, pq_node_create(entry,bufferManager->priority_counter));
+    bufferManager->count--;
 
     return bufferManager;
 }
@@ -129,6 +130,8 @@ BufferManager *buffer_manager_allocate(BufferManager *bufferManager,char **byteA
     //Block exists in the buffer - update its priority and return its byteArray
     if(value->active==0){
         bufferManager->pq = pq_remove(bufferManager->pq, entry);
+        value->active=1;
+        bufferManager->count++;
     }
     //renew the priority of the current block
     value->priority = bufferManager->priority_counter;
@@ -139,6 +142,11 @@ BufferManager *buffer_manager_allocate(BufferManager *bufferManager,char **byteA
 
     hashtable_entry_destroy(entry);
     return bufferManager;
+}
+
+//Function to return the available space in a buffer manager
+int buffer_manager_available_space(BufferManager *bufferManager){
+    return bufferManager->size - bufferManager->count;
 }
 
 //Function to destroy the buffer manager
