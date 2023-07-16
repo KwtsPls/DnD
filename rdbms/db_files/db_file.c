@@ -52,6 +52,12 @@ Database *database_open(char* dir_path){
     return db;
 }
 
+Database *database_open_existing(Database *db, char* dir_path){
+    GList *tables = load_db(dir_path,&db->allocator);
+    db->tables = g_list_concat (db->tables, tables);
+    return db;
+}
+
 //Function to execute a query - returns a list of records
 GList *database_query(Database *db,char *query){
 

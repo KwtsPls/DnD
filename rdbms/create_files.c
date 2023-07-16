@@ -7,13 +7,13 @@
 #include "./table/record.h"
 #include "./db_files/heapfile.h"
 
-BlockAllocator* create_heapfile(gchar *table_name,
+BlockAllocator *allocator;
+
+void create_heapfile(gchar *table_name,
                                 GList *fields,
                                 GList *field_names,
                                 gchar *filename){
-    BlockAllocator *allocator = block_allocator_initialize(BUFFER_SIZE*1024);
     heap_file_create(&allocator,filename,table_name,fields,field_names);
-    return allocator;
 }
 
 #define ADD_FIELD(FIELDS_LIST, FIELD_NAMES_LIST, NAME, TYPE, SIZE) \
@@ -78,9 +78,9 @@ GArray* load_names() {
 const unsigned CUSTOMER_COUNT = 1000;
 const unsigned PURCHASE_COUNT = 5000;
 const unsigned REVIEW_PROBABILITY = 4; // p = 1 / REVIEW_PROBABILITY
+const unsigned FRAGMENTS = 4;
 
 int create_customer(){
-    BlockAllocator *allocator = NULL;
     Table *table=NULL;
 
     GList *fields = NULL;
@@ -90,30 +90,42 @@ int create_customer(){
     ADD_FIELD(fields, field_names, "name", STRING_BOX, 50)
     ADD_FIELD(fields, field_names, "surname", STRING_BOX, 60)
 
-    allocator = create_heapfile("customer", fields, field_names, "data/customer");
+    for (int i = 0; i < FRAGMENTS; i++) {
+        GString *table_name = g_string_new ("customer");
+        g_string_append_printf (table_name, "%d", i);
+        GString *file_path = g_string_new ("data/customer");
+        g_string_append_printf (file_path, "%d", i);
+        create_heapfile("customer", fields, field_names, file_path->str);
+        g_string_free (table_name, FALSE);
+        g_string_free (file_path, FALSE);
+    }
 
     GArray *names = load_names();
 
     //open heap file
     int fd;
-    HPErrorCode status = heap_file_open(&allocator,"data/customer",&fd,&table);
-    if(status==HP_FILE_ERROR) g_error("INCORRECT FILE\n");
+    for (int j = 0; j < FRAGMENTS; j++) {
+        GString *file_path = g_string_new ("data/customer");
+        g_string_append_printf (file_path, "%d", j);
+        HPErrorCode status = heap_file_open (&allocator, file_path->str, &fd, &table);
+        if (status == HP_FILE_ERROR) g_error("INCORRECT FILE\n");
+        for(int i=0;i<CUSTOMER_COUNT/FRAGMENTS;i++){
+            Record *r = record_create();
+            RECORD_ADD_FIELD_INT(r, i + j * (CUSTOMER_COUNT / FRAGMENTS))
+            RECORD_ADD_FIELD_STRING(r, g_array_index(names, char*, rand() % names->len), 50)
+            RECORD_ADD_FIELD_STRING(r, g_array_index(names, char*, rand() % names->len), 60)
 
-    //Insert 100 records as a test
-    for(int i=0;i<CUSTOMER_COUNT;i++){
-        Record *r = record_create();
-        RECORD_ADD_FIELD_INT(r, i)
-        RECORD_ADD_FIELD_STRING(r, g_array_index(names, char*, rand() % names->len), 50)
-        RECORD_ADD_FIELD_STRING(r, g_array_index(names, char*, rand() % names->len), 60)
+            heap_file_insert(&allocator,r,fd);
+            record_destroy(r);
+        }
 
-        heap_file_insert(&allocator,r,fd);
-        record_destroy(r);
+        printf("Fragment %d --------\n", j);
+        heap_file_print_all(&allocator,fd,fields,50+60+sizeof(int));
+
+        heap_file_close(&allocator,fd,&table);
+        g_string_free (file_path, FALSE);
     }
 
-    heap_file_print_all(&allocator,fd,fields,50+60+sizeof(int));
-
-    heap_file_close(&allocator,fd,&table);
-    block_allocator_destroy(allocator);
     g_list_free_full(fields, databox_destroy);
     g_list_free_full(field_names, free);
 
@@ -124,44 +136,70 @@ int create_purchase_and_review(){
     //
     // purchase
     //
-    BlockAllocator *p_allocator = NULL;
-    Table *p_table=NULL;
+    Table *p_tables[FRAGMENTS];
 
     GList *p_fields = NULL;
     GList *p_field_names = NULL;
 
-    ADD_FIELD(p_fields, p_field_names, "id", INT_BOX, sizeof(int));
-    ADD_FIELD(p_fields, p_field_names, "customer_id", INT_BOX, sizeof(int));
-    ADD_FIELD(p_fields, p_field_names, "description", STRING_BOX, 50);
+    ADD_FIELD(p_fields, p_field_names, "id", INT_BOX, sizeof(int))
+    ADD_FIELD(p_fields, p_field_names, "customer_id", INT_BOX, sizeof(int))
+    ADD_FIELD(p_fields, p_field_names, "description", STRING_BOX, 50)
 
-    p_allocator = create_heapfile("purchase", p_fields, p_field_names, "data/purchase");
+    for (int i = 0; i < FRAGMENTS; i++) {
+        GString *table_name = g_string_new ("purchase");
+        g_string_append_printf (table_name, "%d", i);
+        GString *file_path = g_string_new ("data/purchase");
+        g_string_append_printf (file_path, "%d", i);
+        create_heapfile("purchase", p_fields, p_field_names, file_path->str);
+        g_string_free (table_name, FALSE);
+        g_string_free (file_path, FALSE);
+    }
+
     //
     // review
     //
-    BlockAllocator *r_allocator = NULL;
-    Table *r_table=NULL;
+    Table *r_tables[FRAGMENTS];
 
     GList *r_fields = NULL;
     GList *r_field_names = NULL;
 
-    ADD_FIELD(r_fields, r_field_names, "id", INT_BOX, sizeof(int));
-    ADD_FIELD(r_fields, r_field_names, "customer_id", INT_BOX, sizeof(int));
-    ADD_FIELD(r_fields, r_field_names, "purchase_id", INT_BOX, sizeof(int));
-    ADD_FIELD(r_fields, r_field_names, "review", STRING_BOX, 300);
+    ADD_FIELD(r_fields, r_field_names, "id", INT_BOX, sizeof(int))
+    ADD_FIELD(r_fields, r_field_names, "customer_id", INT_BOX, sizeof(int))
+    ADD_FIELD(r_fields, r_field_names, "purchase_id", INT_BOX, sizeof(int))
+    ADD_FIELD(r_fields, r_field_names, "review", STRING_BOX, 300)
 
-    r_allocator = create_heapfile("review", r_fields, r_field_names, "data/review");
+    for (int i = 0; i < FRAGMENTS; i++) {
+        GString *table_name = g_string_new ("review");
+        g_string_append_printf (table_name, "%d", i);
+        GString *file_path = g_string_new ("data/review");
+        g_string_append_printf (file_path, "%d", i);
+        create_heapfile("review", p_fields, p_field_names, file_path->str);
+        g_string_free (table_name, FALSE);
+        g_string_free (file_path, FALSE);
+    }
+
     //
     // purchase
     //
-    int p_fd;
-    HPErrorCode status = heap_file_open(&p_allocator, "data/purchase", &p_fd, &p_table);
-    if(status==HP_FILE_ERROR) g_error("INCORRECT FILE\n");
+    int p_fds[FRAGMENTS];
+    for (int i = 0; i < FRAGMENTS; i++) {
+        GString *file_path = g_string_new ("data/purchase");
+        g_string_append_printf (file_path, "%d", i);
+        HPErrorCode status = heap_file_open(&allocator, file_path->str, &p_fds[i], &p_tables[i]);
+        g_string_free (file_path, FALSE);
+        if(status==HP_FILE_ERROR) g_error("INCORRECT FILE\n");
+    }
     //
     // review
     //
-    int r_fd;
-    status = heap_file_open(&r_allocator, "data/review", &r_fd, &r_table);
-    if(status==HP_FILE_ERROR) g_error("INCORRECT FILE\n");
+    int r_fds[FRAGMENTS];
+    for (int i = 0; i < FRAGMENTS; i++) {
+        GString *file_path = g_string_new ("data/review");
+        g_string_append_printf (file_path, "%d", i);
+        HPErrorCode status = heap_file_open(&allocator, file_path->str, &r_fds[i], &r_tables[i]);
+        g_string_free (file_path, FALSE);
+        if(status==HP_FILE_ERROR) g_error("INCORRECT FILE\n");
+    }
     //
     // insert records (purchase & review)
     //
@@ -174,7 +212,9 @@ int create_purchase_and_review(){
         RECORD_ADD_FIELD_INT(r, customed_id)
         RECORD_ADD_FIELD_STRING(r, "Purchase Description", 50)
 
-        heap_file_insert(&p_allocator, r, p_fd);
+        int destination_fragment = customed_id / (CUSTOMER_COUNT / FRAGMENTS);
+
+        heap_file_insert(&allocator, r, p_fds[destination_fragment]);
         record_destroy(r);
 
         // add a review for this purchase
@@ -186,7 +226,7 @@ int create_purchase_and_review(){
             RECORD_ADD_FIELD_INT(r, i)
             RECORD_ADD_FIELD_STRING(r, "Placeholder Review", 300)
 
-            heap_file_insert(&r_allocator, r, r_fd);
+            heap_file_insert(&allocator, r, r_fds[destination_fragment]);
             record_destroy(r);
 
             review_count++;
@@ -195,19 +235,25 @@ int create_purchase_and_review(){
     //
     // purchase
     //
-    heap_file_print_all(&p_allocator, p_fd, p_fields, 50 + sizeof(int) + sizeof(int));
+    for (int i = 0; i < FRAGMENTS; i++) {
+        printf("Fragment %d --------\n", i);
 
-    heap_file_close(&p_allocator, p_fd, &p_table);
-    block_allocator_destroy(p_allocator);
+        heap_file_print_all(&allocator, p_fds[i], p_fields, 50 + sizeof(int) + sizeof(int));
+
+        heap_file_close(&allocator, p_fds[i], &p_tables[i]);
+    }
     g_list_free_full(p_fields, databox_destroy);
     g_list_free_full(p_field_names, free);
     //
     // review
     //
-    heap_file_print_all(&r_allocator,r_fd,r_fields,300+sizeof(int)+sizeof(int)+sizeof(int));
+    for (int i = 0; i < FRAGMENTS; i++) {
+        printf("Fragment %d --------\n", i);
 
-    heap_file_close(&r_allocator,r_fd,&r_table);
-    block_allocator_destroy(r_allocator);
+        heap_file_print_all(&allocator,r_fds[i],r_fields,300+sizeof(int)+sizeof(int)+sizeof(int));
+
+        heap_file_close(&allocator,r_fds[i],&r_tables[i]);
+    }
     g_list_free_full(r_fields, databox_destroy);
     g_list_free_full(r_field_names, free);
 
@@ -217,8 +263,12 @@ int create_purchase_and_review(){
 int main() {
     srand(1);
 
+    allocator = block_allocator_initialize(BUFFER_SIZE*1024);
+
     create_customer();
     create_purchase_and_review ();
+
+    block_allocator_destroy(allocator);
 
     return 0;
 }
