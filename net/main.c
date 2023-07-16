@@ -44,8 +44,12 @@ records_list_to_string (GList *records)
   for (GList *lp = records; lp != NULL; lp = lp->next)
     {
       Record *r = lp->data;
-      record_print (r);
+      GString *rs = record_to_string (r);
+      g_string_append (s, rs->str);
+      g_string_append_c(s, '\n');
+      g_string_free (rs, FALSE);
     }
+  return s;
 }
 
 gpointer
@@ -72,14 +76,8 @@ client_main (gpointer data)
 
               // execute query
               GList *results = database_query (db, input + 7);
-              for (GList *lp = results; lp != NULL; lp = lp->next)
-                {
-                  Record *r = lp->data;
-                  record_print (r);
-                }
 
-              GString *result = g_string_new ("Query Results -> ");
-              g_string_append (result, input);
+              GString *result = records_list_to_string (results);
               write_to_connection_str (connection, result->str);
               g_string_free (result, FALSE);
             }

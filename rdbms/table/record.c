@@ -63,7 +63,7 @@ int record_compare(Record *r1,Record *r2){
 //Function to print a record
 void record_print(Record *r){
     GString *s = record_to_string (r);
-    printf("%s", s->str);
+    printf("%s\n", s->str);
     g_string_free (s, TRUE);
 }
 
