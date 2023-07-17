@@ -81,6 +81,8 @@ client_main (gpointer data)
       gsize bytes_read = read_from_connection_str (connection, input);
       if (bytes_read > 0)
         {
+          while(db_loading == TRUE);
+
           printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
@@ -88,8 +90,6 @@ client_main (gpointer data)
             }
           else if (strncmp (input, "QUERY", 5) == 0)
             {
-              while(db_loading == TRUE);
-
               if (self->is_leader == FALSE)
                 g_error ("Got a QUERY command without being the leader.");
               printf("(Client) Query to execute:\n\t%s\n", input);
@@ -189,7 +189,9 @@ peer_main (gpointer data)
       gsize bytes_read = read_from_connection_str (connection, input);
       if (bytes_read > 0)
         {
-//          printf ("Got %lu bytes: %s\n", bytes_read, input);
+          while(db_loading == TRUE);
+
+          printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
               write_to_connection_str (connection, "PING");
@@ -200,7 +202,9 @@ peer_main (gpointer data)
             }
           else if (strncmp (input, "LOAD", 4) == 0)
             {
+              db_loading = TRUE;
               load_database_from_fragments (input);
+              db_loading = FALSE;
               // FIXME: Should send a response that confirms the operation.
             }
           else if (strncmp (input, "QUERY", 5) == 0)
@@ -273,8 +277,6 @@ gboolean
 connect_with_peer (gpointer data)
 {
   Peer *p = data;
-
-  printf("Checking peer\n");
 
   // there is a valid connection, do nothing
   if (p->connection != NULL && ping (p->connection) == TRUE)
