@@ -302,11 +302,15 @@ connect_with_peer (gpointer data)
   if (connection != NULL)
     {
       p->connection = connection;
+      printf("Sending ID_REQ to: %s\n", p->address);
       write_to_connection_str (p->connection, "ID_REQ");
       long buffer;
       gsize bytes_read = read_from_connection_long(p->connection, &buffer);
       if (bytes_read > 0)
-        p->id = buffer;
+        {
+          p->id = buffer;
+          printf("Got ID: %ld\n", p->id);
+        }
       if (self->is_leader)
         load_database();
     }
