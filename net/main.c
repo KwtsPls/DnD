@@ -105,6 +105,7 @@ client_main (gpointer data)
                     {
                       g_warning ("Disconnected peer.");
                       load_database();
+                      write_to_connection_str (connection, "Try again!");
                       return NULL;
                       // TODO: Rerun query.
                     }
@@ -128,6 +129,7 @@ client_main (gpointer data)
                     {
                       g_warning ("Disconnected peer (read).");
                       load_database();
+                      write_to_connection_str (connection, "Try again!");
                       return NULL;
                       // TODO: Rerun query.
                     }
@@ -291,7 +293,7 @@ connect_with_peer (gpointer data)
 
   p->connection = NULL;
 
-  printf("Attempting to connect to: %s\n", p->address);
+//  printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
@@ -329,7 +331,7 @@ seniority_succession_algorithm (void)
   for (GList *lp = peers; lp != NULL; lp = lp->next)
     {
       Peer *p = lp->data;
-      printf("Connection %p: %ld ?? %ld\n", p->connection, p->id, self->id);
+//      printf("Connection %p: %ld ?? %ld\n", p->connection, p->id, self->id);
       if (p->connection != NULL && p->id < self->id)
         return; // I shouldn't be the leader
     }
