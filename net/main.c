@@ -191,7 +191,7 @@ peer_main (gpointer data)
         {
           while(db_loading == TRUE);
 
-          printf ("Got %lu bytes: %s\n", bytes_read, input);
+//          printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
               write_to_connection_str (connection, "PING");
@@ -277,6 +277,8 @@ gboolean
 connect_with_peer (gpointer data)
 {
   Peer *p = data;
+
+  printf("Connect with peer: %s\n", p->address);
 
   // there is a valid connection, do nothing
   if (p->connection != NULL && ping (p->connection) == TRUE)
