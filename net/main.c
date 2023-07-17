@@ -232,7 +232,7 @@ void load_database_from_fragments (const gchar *input)
     database_close (db);
   gchar** fragments = g_regex_split_simple(",", input + 6, 0, 0);
   db = database_open (filepath_of_fragment (fragments[0])->str);
-  for (int i = 1; i < g_strv_length (fragments); i++)
+  for (int i = 1; i < g_strv_length (fragments) - 1; i++)
     {
       database_open_existing(db, filepath_of_fragment (fragments[i])->str);
     }
