@@ -72,12 +72,45 @@ client_main (gpointer data)
             {
               if (self->is_leader == FALSE)
                 g_error ("Got a QUERY command without being the leader.");
-              printf("Query to execute:\n\t%s\n", input);
+              printf("(Client) Query to execute:\n\t%s\n", input);
+
+              // send query request to peers
+              for (GList *lp = peers; lp != NULL; lp = lp->next)
+                {
+                  Peer *p = lp->data;
+                  gsize bytes_written = write_to_connection_str (p->connection, input);
+
+                  printf ("Bytes written %d\n", bytes_written);
+                  if (bytes_written == -1)
+                    {
+                      g_warning ("Disconnected peer.");
+                      // TODO: Call for the migration of the peer.
+                    }
+                }
 
               // execute query
               GList *results = database_query (db, input + 7);
 
+              // combine results and respond
               GString *result = records_list_to_string (results);
+
+              // get query results from peers
+              for (GList *lp = peers; lp != NULL; lp = lp->next)
+                {
+                  Peer *p = lp->data;
+                  gchar input[256];
+                  gsize bytes_read = read_from_connection_str (p->connection, input);
+
+                  printf ("Bytes read %lu: %s\n", bytes_read, input);
+                  if (bytes_read == -1)
+                    {
+                      g_warning ("Disconnected peer (read).");
+                      // TODO: Call for the migration of the peer.
+                    }
+
+                  g_string_append (result, input);
+                }
+
               write_to_connection_str (connection, result->str);
               g_string_free (result, FALSE);
             }
@@ -145,9 +178,14 @@ peer_main (gpointer data)
             }
           else if (strncmp (input, "QUERY", 5) == 0)
             {
-              if (self->is_leader == FALSE)
-                g_error ("Got a QUERY command without being the leader.");
-              printf("Query to execute:\n\t%s", input);
+              printf("(Peer) Query to execute:\n\t%s", input);
+
+              // execute query
+              GList *results = database_query (db, input + 7);
+
+              GString *result = records_list_to_string (results);
+              write_to_connection_str (connection, result->str);
+              g_string_free (result, FALSE);
             }
         }
       else if (ping (connection) == FALSE)
