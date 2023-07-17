@@ -329,7 +329,14 @@ load_database (void)
 
   db_loading = TRUE;
 
-  guint peer_count = g_list_length (peers) + 1;
+  guint peer_count = 1;
+  for (GList *lp = peers; lp != NULL; lp = lp->next)
+    {
+      Peer *p = lp->data;
+      if (p->connection != NULL && ping (p->connection) == TRUE)
+        peer_count++;
+    }
+
   GString* fragments_per_peer[peer_count];
   for (int i = 0; i < peer_count; i++)
     fragments_per_peer[i] = g_string_new ("");
@@ -350,7 +357,7 @@ load_database (void)
 static GOptionEntry entries[] =
     {
         { "addresses", 'a', 0, G_OPTION_ARG_STRING, &servers_filepath, "File containing the addresses of the servers used in the system.", NULL },
-        { "database", 'd', 0, G_OPTION_ARG_STRING, &database_folderpath, "Directory containing the database files.",                         NULL },
+        { "database", 'd', 0, G_OPTION_ARG_STRING, &database_folderpath, "Directory containing the database files.",                       NULL },
         { NULL }
     };
 
