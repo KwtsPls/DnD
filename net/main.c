@@ -63,7 +63,7 @@ client_main (gpointer data)
       gsize bytes_read = read_from_connection_str (connection, input);
       if (bytes_read > 0)
         {
-          printf ("Got %lu bytes: %s\n", bytes_read, input);
+//          printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
               write_to_connection_str (connection, "PING");
@@ -107,8 +107,8 @@ client_main (gpointer data)
                       g_warning ("Disconnected peer (read).");
                       // TODO: Call for the migration of the peer.
                     }
-
-                  g_string_append (result, input);
+                  else
+                    g_string_append (result, input);
                 }
 
               write_to_connection_str (connection, result->str);
@@ -167,7 +167,7 @@ peer_main (gpointer data)
       gsize bytes_read = read_from_connection_str (connection, input);
       if (bytes_read > 0)
         {
-          printf ("Got %lu bytes: %s\n", bytes_read, input);
+//          printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
               write_to_connection_str (connection, "PING");
@@ -240,7 +240,7 @@ connect_with_peer (gpointer data)
 
   p->connection = NULL;
 
-  printf("Attempting to connect to: %s\n", p->address);
+//  printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
