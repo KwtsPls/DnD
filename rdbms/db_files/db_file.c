@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include "db_file.h"
 #include "../compiler/semantic.h"
 #include "../joins/bnl.h"
@@ -34,6 +36,33 @@ GList* load_db(char* dir_path,BlockAllocator **allocator) {
     return tables;
 }
 
+GList* load_db_temp(char* dir_path,BlockAllocator **allocator) {
+    GList *tables = NULL;
+    GDir *dir;
+    const gchar *filename;
+    dir = g_dir_open(dir_path, 0, NULL);
+    while ((filename = g_dir_read_name(dir))) {
+        if (strrchr(filename, '.') == NULL) { // checks for the existence of '.' in the filename
+            GString *filepath = g_string_new (dir_path);
+            g_string_append (filepath, filename);
+            GString *temp_filepath = g_string_new (filepath->str);
+            g_string_append (temp_filepath, ".temp");
+
+            pid_t pid = fork();
+            if (pid == 0) { /* child */
+                execl("/bin/cp", "/bin/cp", filepath->str, temp_filepath->str, (char *)0);
+            }
+            while (wait(NULL) > 0);
+
+            tables = g_list_append (tables, load_db_file (temp_filepath->str,allocator));
+            g_string_free (filepath, TRUE);
+            g_string_free (temp_filepath, TRUE);
+        }
+    }
+    g_dir_close(dir);
+    return tables;
+}
+
 void database_table_destroy(void *_table){
     return;
 }
@@ -44,7 +73,7 @@ void database_table_destroy(void *_table){
 Database *database_open(char* dir_path){
     Database *db = malloc(sizeof(Database));
     BlockAllocator *allocator = block_allocator_initialize(BUFFER_SIZE*1024);
-    GList *tables = load_db(dir_path,&allocator);
+    GList *tables = load_db_temp(dir_path,&allocator);
 
     db->allocator = allocator;
     db->tables = tables;

@@ -3,11 +3,13 @@
 //
 #include <stdio.h>
 #include <gtk/gtk.h>
+#include <stdlib.h>
 #include "../utils/networking_utils.h"
 #include "../rdbms/db_files/db_file.h"
-#include "../rdbms/table/record.h"
 
 static Database *db;
+
+void load_database (void);
 
 typedef struct {
   gchar *address;
@@ -36,6 +38,19 @@ peer_delete (Peer *p)
 
 GList *peers = NULL;
 Peer *self = NULL;
+gboolean db_loading = FALSE;
+
+static gchar *servers_filepath = NULL;
+static gchar *database_folderpath = NULL;
+const int FRAGMENT_COUNT = 4;
+
+GString*
+filepath_of_fragment(char* frag)
+{
+  GString *filepath = g_string_new (database_folderpath);
+  g_string_append (filepath, frag);
+  return filepath;
+}
 
 GString*
 records_list_to_string (GList *records)
@@ -70,6 +85,8 @@ client_main (gpointer data)
             }
           else if (strncmp (input, "QUERY", 5) == 0)
             {
+              while(db_loading == TRUE);
+
               if (self->is_leader == FALSE)
                 g_error ("Got a QUERY command without being the leader.");
               printf("(Client) Query to execute:\n\t%s\n", input);
@@ -84,7 +101,8 @@ client_main (gpointer data)
                   if (bytes_written == -1)
                     {
                       g_warning ("Disconnected peer.");
-                      // TODO: Call for the migration of the peer.
+                      load_database();
+                      // TODO: Rerun query.
                     }
                 }
 
@@ -105,7 +123,8 @@ client_main (gpointer data)
                   if (bytes_read == -1)
                     {
                       g_warning ("Disconnected peer (read).");
-                      // TODO: Call for the migration of the peer.
+                      load_database();
+                      // TODO: Rerun query.
                     }
                   else
                     g_string_append (result, input);
@@ -175,6 +194,17 @@ peer_main (gpointer data)
           else if (strncmp (input, "COORDINATOR", 11) == 0)
             {
 
+            }
+          else if (strncmp (input, "LOAD", 4) == 0)
+            {
+              database_close (db);
+              gchar** fragments = g_regex_split_simple(",", input + 4, 0, 0);
+              db = database_open (filepath_of_fragment (fragments[0])->str);
+              for (int i = 1; i < g_strv_length (fragments); i++)
+                {
+                  database_open_existing(db, filepath_of_fragment (fragments[i])->str);
+                }
+              g_strfreev (fragments);
             }
           else if (strncmp (input, "QUERY", 5) == 0)
             {
@@ -258,6 +288,8 @@ connect_with_peer (gpointer data)
       gsize bytes_read = read_from_connection_long(p->connection, &buffer);
       if (bytes_read > 0)
         p->id = buffer;
+      if (self->is_leader)
+        load_database();
     }
 
   return G_SOURCE_CONTINUE;
@@ -281,20 +313,44 @@ seniority_succession_algorithm (void)
     {
       Peer *p = lp->data;
       if (p->connection != NULL)
-        write_to_connection_str (p->connection, "COORDINATOR"); // TODO: The peers should check the ID.
+        write_to_connection_str (p->connection, "COORDINATOR");
     }
 
   printf ("Assuming leadership\n");
   self->is_leader = TRUE;
+  load_database ();
 }
 
-static gchar *servers_filepath = NULL;
-static gchar *database_filepath = NULL;
+void
+load_database (void)
+{
+  if (self->is_leader == FALSE)
+    g_error("Non-leader trying to load the database of the system.");
+
+  db_loading = TRUE;
+
+  guint peer_count = g_list_length (peers) + 1;
+  GString* fragments_per_peer[peer_count];
+  for (int i = 0; i < peer_count; i++)
+    fragments_per_peer[i] = g_string_new ("");
+
+  for (int i = 0; i < FRAGMENT_COUNT; i++)
+    {
+      char str[4];
+      sprintf(str, "%d,", i);
+      g_string_append (fragments_per_peer[i % peer_count], str);
+    }
+
+  for (int i = 0; i < peer_count; i++)
+    printf("Peer %d: %s\n", i, fragments_per_peer[i]->str);
+
+  db_loading = FALSE;
+}
 
 static GOptionEntry entries[] =
     {
         { "addresses", 'a', 0, G_OPTION_ARG_STRING, &servers_filepath, "File containing the addresses of the servers used in the system.", NULL },
-        { "database", 'd', 0, G_OPTION_ARG_STRING, &database_filepath, "Directory containing the database files.",                         NULL },
+        { "database", 'd', 0, G_OPTION_ARG_STRING, &database_folderpath, "Directory containing the database files.",                         NULL },
         { NULL }
     };
 
@@ -316,10 +372,8 @@ main (int    argc,
   if (servers_filepath == NULL)
     g_error ("please provide a server file.\n");
 
-  if (database_filepath == NULL)
+  if (database_folderpath == NULL)
     g_error ("please provide a database directory.\n");
-
-  db = database_open (database_filepath);
 
   FILE * fp;
   char * line = NULL;
