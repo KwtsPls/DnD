@@ -24,6 +24,7 @@ GList* load_db(char* dir_path,BlockAllocator **allocator) {
     GDir *dir;
     const gchar *filename;
     dir = g_dir_open(dir_path, 0, NULL);
+    printf("%s\n", dir_path);
     while ((filename = g_dir_read_name(dir))) {
         if (strrchr(filename, '.') == NULL) { // checks for the existence of '.' in the filename
             GString *filepath = g_string_new (dir_path);
@@ -41,6 +42,7 @@ GList* load_db_temp(char* dir_path,BlockAllocator **allocator) {
     GDir *dir;
     const gchar *filename;
     dir = g_dir_open(dir_path, 0, NULL);
+    printf("%s\n", dir_path);
     while ((filename = g_dir_read_name(dir))) {
         if (strrchr(filename, '.') == NULL) { // checks for the existence of '.' in the filename
             GString *filepath = g_string_new (dir_path);
