@@ -281,7 +281,7 @@ connect_with_peer (gpointer data)
 
   Peer *p = data;
 
-  printf("Connect with peer: %s\n", p->address);
+//  printf("Connect with peer: %s\n", p->address);
 
   // there is a valid connection, do nothing
   if (p->connection != NULL && ping (p->connection) == TRUE)
@@ -289,7 +289,7 @@ connect_with_peer (gpointer data)
 
   p->connection = NULL;
 
-  printf("Attempting to connect to: %s\n", p->address);
+//  printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
@@ -323,6 +323,7 @@ seniority_succession_algorithm (void)
   for (GList *lp = peers; lp != NULL; lp = lp->next)
     {
       Peer *p = lp->data;
+      printf("%s ?? %s\n", p->id, self->id);
       if (p->connection != NULL && p->id < self->id)
         return; // I shouldn't be the leader
     }
@@ -384,7 +385,7 @@ load_database (void)
 
   load_database_from_fragments (fragments_per_peer[0]->str);
 
-  sleep (1);
+  sleep (1); // workaround for the FIXME that follows
 
   // FIXME: Should wait for a response that confirms the operation on each peer.
 
