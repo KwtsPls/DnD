@@ -81,7 +81,7 @@ client_main (gpointer data)
       gsize bytes_read = read_from_connection_str (connection, input);
       if (bytes_read > 0)
         {
-//          printf ("Got %lu bytes: %s\n", bytes_read, input);
+          printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
               write_to_connection_str (connection, "PING");
@@ -189,7 +189,7 @@ peer_main (gpointer data)
       gsize bytes_read = read_from_connection_str (connection, input);
       if (bytes_read > 0)
         {
-//          printf ("Got %lu bytes: %s\n", bytes_read, input);
+          printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
               write_to_connection_str (connection, "PING");
@@ -280,7 +280,7 @@ connect_with_peer (gpointer data)
 
   p->connection = NULL;
 
-//  printf("Attempting to connect to: %s\n", p->address);
+  printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
@@ -337,6 +337,8 @@ load_database (void)
   if (self->is_leader == FALSE)
     g_error("Non-leader trying to load the database of the system.");
 
+  printf("DATABASE LOADING STARTED!");
+
   db_loading = TRUE;
 
   guint peer_count = 1;
@@ -376,6 +378,8 @@ load_database (void)
   // FIXME: Should wait for a response that confirms the operation on each peer.
 
   db_loading = FALSE;
+
+  printf("DATABASE LOADING FINISHED!");
 }
 
 static GOptionEntry entries[] =
