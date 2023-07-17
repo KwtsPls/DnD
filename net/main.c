@@ -105,6 +105,7 @@ client_main (gpointer data)
                     {
                       g_warning ("Disconnected peer.");
                       load_database();
+                      return NULL;
                       // TODO: Rerun query.
                     }
                 }
@@ -127,6 +128,7 @@ client_main (gpointer data)
                     {
                       g_warning ("Disconnected peer (read).");
                       load_database();
+                      return NULL;
                       // TODO: Rerun query.
                     }
                   else
