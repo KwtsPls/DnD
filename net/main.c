@@ -375,11 +375,11 @@ load_database (void)
       Peer *p = lp->data;
       if (p->connection != NULL && ping (p->connection) == TRUE)
         {
-          write_to_connection_str (p->connection, fragments_per_peer[i++]->str);
+//          write_to_connection_str (p->connection, fragments_per_peer[i++]->str);
         }
     }
-//
-//  load_database_from_fragments (fragments_per_peer[0]->str);
+
+  load_database_from_fragments (fragments_per_peer[0]->str);
 
   // FIXME: Should wait for a response that confirms the operation on each peer.
 
