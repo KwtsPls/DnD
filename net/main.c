@@ -276,6 +276,9 @@ peer_connection (GSocketService     *service,
 gboolean
 connect_with_peer (gpointer data)
 {
+  if (db_loading == TRUE)
+    return G_SOURCE_CONTINUE;
+
   Peer *p = data;
 
   printf("Connect with peer: %s\n", p->address);
@@ -375,7 +378,7 @@ load_database (void)
       Peer *p = lp->data;
       if (p->connection != NULL && ping (p->connection) == TRUE)
         {
-//          write_to_connection_str (p->connection, fragments_per_peer[i++]->str);
+          write_to_connection_str (p->connection, fragments_per_peer[i++]->str);
         }
     }
 
