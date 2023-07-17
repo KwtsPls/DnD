@@ -49,7 +49,9 @@ GString*
 filepath_of_fragment(char* frag)
 {
   GString *filepath = g_string_new (database_folderpath);
+  g_string_append (filepath, "data");
   g_string_append (filepath, frag);
+  g_string_append (filepath, "/");
   return filepath;
 }
 
@@ -226,7 +228,8 @@ peer_main (gpointer data)
 
 void load_database_from_fragments (const gchar *input)
 {
-  database_close (db);
+  if (db != NULL)
+    database_close (db);
   gchar** fragments = g_regex_split_simple(",", input + 6, 0, 0);
   db = database_open (filepath_of_fragment (fragments[0])->str);
   for (int i = 1; i < g_strv_length (fragments); i++)
