@@ -384,6 +384,8 @@ load_database (void)
 
   load_database_from_fragments (fragments_per_peer[0]->str);
 
+  sleep (1);
+
   // FIXME: Should wait for a response that confirms the operation on each peer.
 
   db_loading = FALSE;
