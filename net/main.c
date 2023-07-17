@@ -98,13 +98,19 @@ client_main (gpointer data)
               for (GList *lp = peers; lp != NULL; lp = lp->next)
                 {
                   Peer *p = lp->data;
+                  if (p->connection == NULL)
+                    continue;
+
                   gsize bytes_written = write_to_connection_str (p->connection, input);
 
                   printf ("Bytes written %d\n", bytes_written);
                   if (bytes_written == -1)
                     {
                       g_warning ("Disconnected peer.");
+                      p->connection = NULL;
                       load_database();
+                      write_to_connection_str (connection, "Try again!");
+                      return NULL;
                       // TODO: Rerun query.
                     }
                 }
@@ -119,6 +125,9 @@ client_main (gpointer data)
               for (GList *lp = peers; lp != NULL; lp = lp->next)
                 {
                   Peer *p = lp->data;
+                  if (p->connection == NULL)
+                    continue;
+
                   gchar input[256];
                   gsize bytes_read = read_from_connection_str (p->connection, input);
 
@@ -126,7 +135,10 @@ client_main (gpointer data)
                   if (bytes_read == -1)
                     {
                       g_warning ("Disconnected peer (read).");
+                      p->connection = NULL;
                       load_database();
+                      write_to_connection_str (connection, "Try again!");
+                      return NULL;
                       // TODO: Rerun query.
                     }
                   else
@@ -287,9 +299,14 @@ connect_with_peer (gpointer data)
   if (p->connection != NULL && ping (p->connection) == TRUE)
     return G_SOURCE_CONTINUE;
 
-  p->connection = NULL;
+  gboolean reload_db = FALSE;
+  if (p->connection != NULL)
+    {
+      p->connection = NULL;
+      reload_db = TRUE;
+    }
 
-  printf("Attempting to connect to: %s\n", p->address);
+//  printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
@@ -302,13 +319,21 @@ connect_with_peer (gpointer data)
   if (connection != NULL)
     {
       p->connection = connection;
+      printf("Sending ID_REQ to: %s\n", p->address);
       write_to_connection_str (p->connection, "ID_REQ");
       long buffer;
       gsize bytes_read = read_from_connection_long(p->connection, &buffer);
       if (bytes_read > 0)
-        p->id = buffer;
+        {
+          p->id = buffer;
+          printf("Got ID: %ld\n", p->id);
+        }
       if (self->is_leader)
         load_database();
+    }
+  else if (reload_db && self->is_leader)
+    {
+      load_database();
     }
 
   return G_SOURCE_CONTINUE;
@@ -323,7 +348,7 @@ seniority_succession_algorithm (void)
   for (GList *lp = peers; lp != NULL; lp = lp->next)
     {
       Peer *p = lp->data;
-//      printf("%ld ?? %ld\n", p->id, self->id);
+//      printf("Connection %p: %ld ?? %ld\n", p->connection, p->id, self->id);
       if (p->connection != NULL && p->id < self->id)
         return; // I shouldn't be the leader
     }
