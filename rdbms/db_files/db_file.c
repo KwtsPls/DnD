@@ -6,6 +6,7 @@
 #include "db_file.h"
 #include "../compiler/semantic.h"
 #include "../joins/bnl.h"
+#include "../joins/hash_join.h"
 
 
 Table* load_db_file(char* filepath,BlockAllocator **allocator) {
@@ -119,35 +120,54 @@ GList *database_query(Database *db,char *query){
 
     BooleanExpr *bool = stm->expr;
     ResultSet *set = NULL;
-    for(int i=0;i<bool->size;i++){
-        Expr *expr = bool->expr[i];
-        Table *table1;
-        void *data;
-        char *field1;
-        char *field2;
-        TokenType op;
-        int join = decide_expression(db,expr,&table1,&data,&field1,&field2,&op);
 
-        //Perform a filter
-        if(set==NULL){
-            if(join==0)
-                set = heap_file_filter(&db->allocator,&table1,field1,op,data);
-            else {
-                Table *table2 = (Table*)data;
-                set = heap_file_bnl(&db->allocator, &table1, &table2,field1,field2,op);
-            }
-        }
-        else{
-            ResultSet *set1 = NULL;
-            if(join==0)
-                set1 = heap_file_filter(&db->allocator,&table1,field1,op,data);
-            else {
-                Table *table2 = (Table*)data;
-                set1 = heap_file_bnl(&db->allocator, &table1, &table2,field1,field2,op);
-            }
-            set = result_set_and(set,set1);
-        }
+    if(bool!=NULL) {
+        for (int i = 0; i < bool->size; i++) {
+            Expr *expr = bool->expr[i];
+            Table *table1;
+            void *data;
+            char *field1;
+            char *field2;
+            TokenType op;
+            int join = decide_expression(db, expr, &table1, &data, &field1, &field2, &op);
 
+            //Perform a filter
+            if (set == NULL) {
+                if (join == 0)
+                    set = heap_file_filter(&db->allocator, &table1, field1, op, data);
+                else {
+                    Table *table2 = (Table *) data;
+                    if(op==EQUAL || op==NOT_EQUAL)
+                        set = heap_file_hash_join(&db->allocator, &table1, &table2, field1, field2, op);
+                    else
+                        set = heap_file_bnl(&db->allocator, &table1, &table2, field1, field2, op);
+                }
+            } else {
+                ResultSet *set1 = NULL;
+                if (join == 0)
+                    set1 = heap_file_filter(&db->allocator, &table1, field1, op, data);
+                else {
+                    Table *table2 = (Table *) data;
+                    if(op==EQUAL || op==NOT_EQUAL)
+                        set1 = heap_file_hash_join(&db->allocator, &table1, &table2, field1, field2, op);
+                    else
+                        set1 = heap_file_bnl(&db->allocator, &table1, &table2, field1, field2, op);
+                }
+                set = result_set_and(set, set1);
+            }
+
+        }
+    }
+    else{
+        for(GList *node = stm->tables; node != NULL; node = node->next){
+            TableToken *tableToken = node->data;
+            Table *table = database_get_table(db,tableToken->name);
+
+            if(set==NULL)
+                set = heap_file_scan(&db->allocator,&table);
+            else
+                set = result_set_and(set, heap_file_scan(&db->allocator,&table));
+        }
     }
 
     GList *records = result_set_finalize(set,stm,db->tables);

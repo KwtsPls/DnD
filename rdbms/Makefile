@@ -14,7 +14,7 @@ LDLIBS = $(shell pkg-config --libs glib-2.0)
 
 # set the name of the executable file to compile here
 PROGRAM = main
-OBJS = main.o ./compiler/tokenizer.o ./compiler/parser.o ./compiler/semantic.o ./disk/block.o ./memory/buffer_manager.o ./memory/priority_queue.o ./table/databox.o ./table/record.o ./table/table.o ./table/result_set.o ./db_files/heapfile.o ./db_files/result_file.o ./db_files/db_file.o ./joins/bnl.o
+OBJS = main.o ./compiler/tokenizer.o ./compiler/parser.o ./compiler/semantic.o ./disk/block.o ./memory/buffer_manager.o ./memory/priority_queue.o ./table/databox.o ./table/record.o ./table/table.o ./table/result_set.o ./db_files/heapfile.o ./db_files/result_file.o ./db_files/db_file.o ./joins/bnl.o ./joins/hash_join.o
 
 PROGRAM_CREATE = create_files
 OBJS_CREATE = create_files.o ./compiler/tokenizer.o ./compiler/parser.o ./disk/block.o ./memory/buffer_manager.o ./memory/priority_queue.o ./table/databox.o ./table/record.o ./table/table.o ./table/result_set.o ./db_files/heapfile.o ./db_files/result_file.o

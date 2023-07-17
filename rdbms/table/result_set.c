@@ -103,6 +103,8 @@ ResultSet *result_set_and(ResultSet *set1,ResultSet *set2){
                 result_set_add_item(set,item);
             }
         }
+        result_set_destroy(set1);
+        result_set_destroy(set2);
         return set;
     }
     else{

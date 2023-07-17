@@ -11,8 +11,7 @@
 
 int main(int argc, char **argv){
     Database *database = database_open("./data/data0/");
-    database = database_open_existing(database,"./data/data1/");
-    GList *records = database_query(database,"SELECT COUNT(customer.id) FROM customer  WHERE customer.id>0");
+    GList *records = database_query(database,"SELECT customer.id,purchase.id,purchase.customer_id FROM customer,purchase WHERE customer.id=purchase.id LIMIT 10");
     for(GList *node = records; node != NULL; node = node->next){
         Record *r = (Record*)node->data;
         record_print(r);

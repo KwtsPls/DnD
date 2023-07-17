@@ -8,5 +8,5 @@ include_directories(${GTK_INCLUDE_DIRS})
 link_directories(${GTK_LIBRARY_DIRS})
 add_definitions(${GTK_CFLAGS_OTHER})
 
-add_executable(net main.c ../utils/networking_utils.c ../rdbms/compiler/tokenizer.c ../rdbms/compiler/parser.c ../rdbms/compiler/semantic.c ../rdbms/disk/block.c ../rdbms/memory/buffer_manager.c ../rdbms/memory/priority_queue.c ../rdbms/table/databox.c ../rdbms/table/record.c ../rdbms/table/table.c ../rdbms/table/result_set.c ../rdbms/db_files/heapfile.c ../rdbms/db_files/result_file.c ../rdbms/db_files/db_file.c ../rdbms/joins/bnl.c)
+add_executable(net main.c ../utils/networking_utils.c ../rdbms/compiler/tokenizer.c ../rdbms/compiler/parser.c ../rdbms/compiler/semantic.c ../rdbms/disk/block.c ../rdbms/memory/buffer_manager.c ../rdbms/memory/priority_queue.c ../rdbms/table/databox.c ../rdbms/table/record.c ../rdbms/table/table.c ../rdbms/table/result_set.c ../rdbms/db_files/heapfile.c ../rdbms/db_files/result_file.c ../rdbms/db_files/db_file.c ../rdbms/joins/bnl.c ../rdbms/joins/hash_join.c)
 target_link_libraries(net ${GTK_LIBRARIES})

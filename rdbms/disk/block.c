@@ -143,6 +143,7 @@ Block *block_set_dirty(Block *block){
 void block_unpin(BlockAllocator **allocator,int fd, Block **block){
     if((*block)->bit==1){
         block_write(fd,*block);
+        (*block)->bit=0;
     }
     //Set the current block as a candidate for removal
     (*allocator)->bufferManager = buffer_manager_set_inactive((*allocator)->bufferManager, block_file_name(allocator,fd),(*block)->block_number);
