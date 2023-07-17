@@ -98,6 +98,9 @@ client_main (gpointer data)
               for (GList *lp = peers; lp != NULL; lp = lp->next)
                 {
                   Peer *p = lp->data;
+                  if (p->connection == NULL)
+                    continue;
+
                   gsize bytes_written = write_to_connection_str (p->connection, input);
 
                   printf ("Bytes written %d\n", bytes_written);
@@ -122,6 +125,9 @@ client_main (gpointer data)
               for (GList *lp = peers; lp != NULL; lp = lp->next)
                 {
                   Peer *p = lp->data;
+                  if (p->connection == NULL)
+                    continue;
+
                   gchar input[256];
                   gsize bytes_read = read_from_connection_str (p->connection, input);
 
