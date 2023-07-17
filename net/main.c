@@ -327,7 +327,7 @@ seniority_succession_algorithm (void)
   for (GList *lp = peers; lp != NULL; lp = lp->next)
     {
       Peer *p = lp->data;
-//      printf("%ld ?? %ld\n", p->id, self->id);
+      printf("Connection %p: %ld ?? %ld\n", p->connection, p->id, self->id);
       if (p->connection != NULL && p->id < self->id)
         return; // I shouldn't be the leader
     }
