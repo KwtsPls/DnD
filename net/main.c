@@ -189,7 +189,7 @@ peer_main (gpointer data)
       gsize bytes_read = read_from_connection_str (connection, input);
       if (bytes_read > 0)
         {
-          printf ("Got %lu bytes: %s\n", bytes_read, input);
+//          printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
               write_to_connection_str (connection, "PING");
@@ -273,6 +273,8 @@ gboolean
 connect_with_peer (gpointer data)
 {
   Peer *p = data;
+
+  printf("Checking peer\n");
 
   // there is a valid connection, do nothing
   if (p->connection != NULL && ping (p->connection) == TRUE)
