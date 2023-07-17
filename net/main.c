@@ -299,7 +299,12 @@ connect_with_peer (gpointer data)
   if (p->connection != NULL && ping (p->connection) == TRUE)
     return G_SOURCE_CONTINUE;
 
-  p->connection = NULL;
+  gboolean reload_db = FALSE;
+  if (p->connection != NULL)
+    {
+      p->connection = NULL;
+      reload_db = TRUE;
+    }
 
 //  printf("Attempting to connect to: %s\n", p->address);
 
@@ -325,6 +330,10 @@ connect_with_peer (gpointer data)
         }
       if (self->is_leader)
         load_database();
+    }
+  else if (reload_db && self->is_leader)
+    {
+      load_database();
     }
 
   return G_SOURCE_CONTINUE;
