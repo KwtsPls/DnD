@@ -11,6 +11,7 @@ static Database *db;
 
 void load_database (void);
 
+void load_database_from_fragments (const gchar *input);
 typedef struct {
   gchar *address;
   time_t id;
@@ -197,14 +198,8 @@ peer_main (gpointer data)
             }
           else if (strncmp (input, "LOAD", 4) == 0)
             {
-              database_close (db);
-              gchar** fragments = g_regex_split_simple(",", input + 4, 0, 0);
-              db = database_open (filepath_of_fragment (fragments[0])->str);
-              for (int i = 1; i < g_strv_length (fragments); i++)
-                {
-                  database_open_existing(db, filepath_of_fragment (fragments[i])->str);
-                }
-              g_strfreev (fragments);
+              load_database_from_fragments (input);
+              // FIXME: Should send a response that confirms the operation.
             }
           else if (strncmp (input, "QUERY", 5) == 0)
             {
@@ -227,6 +222,18 @@ peer_main (gpointer data)
   g_object_unref (connection);
 
   return NULL;
+}
+
+void load_database_from_fragments (const gchar *input)
+{
+  database_close (db);
+  gchar** fragments = g_regex_split_simple(",", input + 6, 0, 0);
+  db = database_open (filepath_of_fragment (fragments[0])->str);
+  for (int i = 1; i < g_strv_length (fragments); i++)
+    {
+      database_open_existing(db, filepath_of_fragment (fragments[i])->str);
+    }
+  g_strfreev (fragments);
 }
 
 gboolean
@@ -339,7 +346,7 @@ load_database (void)
 
   GString* fragments_per_peer[peer_count];
   for (int i = 0; i < peer_count; i++)
-    fragments_per_peer[i] = g_string_new ("");
+    fragments_per_peer[i] = g_string_new ("LOAD: ");
 
   for (int i = 0; i < FRAGMENT_COUNT; i++)
     {
@@ -350,6 +357,20 @@ load_database (void)
 
   for (int i = 0; i < peer_count; i++)
     printf("Peer %d: %s\n", i, fragments_per_peer[i]->str);
+
+  int i = 1;
+  for (GList *lp = peers; lp != NULL; lp = lp->next)
+    {
+      Peer *p = lp->data;
+      if (p->connection != NULL && ping (p->connection) == TRUE)
+        {
+          write_to_connection_str (p->connection, fragments_per_peer[i++]->str);
+        }
+    }
+
+  load_database_from_fragments (fragments_per_peer[0]->str);
+
+  // FIXME: Should wait for a response that confirms the operation on each peer.
 
   db_loading = FALSE;
 }
