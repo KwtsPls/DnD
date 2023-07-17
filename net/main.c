@@ -289,7 +289,7 @@ connect_with_peer (gpointer data)
 
   p->connection = NULL;
 
-//  printf("Attempting to connect to: %s\n", p->address);
+  printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
