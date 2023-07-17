@@ -369,15 +369,15 @@ load_database (void)
   for (int i = 0; i < peer_count; i++)
     printf("Peer %d: %s\n", i, fragments_per_peer[i]->str);
 
-//  int i = 1;
-//  for (GList *lp = peers; lp != NULL; lp = lp->next)
-//    {
-//      Peer *p = lp->data;
-//      if (p->connection != NULL && ping (p->connection) == TRUE)
-//        {
-//          write_to_connection_str (p->connection, fragments_per_peer[i++]->str);
-//        }
-//    }
+  int i = 1;
+  for (GList *lp = peers; lp != NULL; lp = lp->next)
+    {
+      Peer *p = lp->data;
+      if (p->connection != NULL && ping (p->connection) == TRUE)
+        {
+          write_to_connection_str (p->connection, fragments_per_peer[i++]->str);
+        }
+    }
 //
 //  load_database_from_fragments (fragments_per_peer[0]->str);
 
