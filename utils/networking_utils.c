@@ -55,8 +55,10 @@ gsize
 read_from_connection_str (GSocketConnection *connection,
                           gchar             *buffer)
 {
+  printf("Hello\n");
   if (g_io_stream_is_closed (G_IO_STREAM (connection)))
     return -1;
+  printf("World\n");
   GInputStream *istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
   return g_input_stream_read (istream,
                               buffer,
