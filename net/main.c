@@ -130,7 +130,7 @@ client_main (gpointer data)
               for (GList *lp = peers; lp != NULL; lp = lp->next)
                 {
                   Peer *p = lp->data;
-                  if (p->connection == NULL)
+                  if (p->connection == NULL || ping(p->connection) == FALSE)
                     continue;
 
                   gchar input[256];
