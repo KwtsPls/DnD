@@ -120,11 +120,11 @@ client_main (gpointer data)
                     }
                 }
 
-//              // execute query
-//              GList *results = database_query (db, input + 7);
-//
-//              // combine results and respond
-//              GString *result = records_list_to_string (results);
+              // execute query
+              GList *results = database_query (db, input + 7);
+
+              // combine results and respond
+              GString *result = records_list_to_string (results);
 
               // get query results from peers
               for (GList *lp = peers; lp != NULL; lp = lp->next)
@@ -146,16 +146,16 @@ client_main (gpointer data)
                       return NULL;
                       // TODO: Rerun query.
                     }
-//                  else
-//                    g_string_append (result, input);
+                  else
+                    g_string_append (result, input);
                 }
-//
-//              end = clock();
-//              cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-//              printf("Loading time: %lf\n", cpu_time_used);
-//
-//              write_to_connection_str (connection, result->str);
-//              g_string_free (result, FALSE);
+
+              end = clock();
+              cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+              printf("Loading time: %lf\n", cpu_time_used);
+
+              write_to_connection_str (connection, result->str);
+              g_string_free (result, FALSE);
             }
         }
       else if (ping (connection) == FALSE)
