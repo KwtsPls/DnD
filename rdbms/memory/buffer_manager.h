@@ -4,7 +4,7 @@
 #include <glib.h>
 #include "priority_queue.h"
 
-#define BUFFER_SIZE 51200
+#define BUFFER_SIZE 512000
 
 typedef struct pq_node PQNode;
 typedef struct pq PriorityQueue;

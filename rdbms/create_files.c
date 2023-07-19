@@ -75,8 +75,8 @@ GArray* load_names() {
     return names;
 }
 
-const unsigned CUSTOMER_COUNT = 50000;
-const unsigned PURCHASE_COUNT = 300000;
+const unsigned CUSTOMER_COUNT = 30000;
+const unsigned PURCHASE_COUNT = 90000;
 const unsigned REVIEW_PROBABILITY = 4; // p = 1 / REVIEW_PROBABILITY
 const unsigned FRAGMENTS = 4;
 
