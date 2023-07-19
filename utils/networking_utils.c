@@ -51,7 +51,7 @@ write_to_connection_str (GSocketConnection *connection,
   return bytes_written;
 }
 
-gsize
+gssize
 read_from_connection_str (GSocketConnection *connection,
                           gchar             *buffer)
 {

@@ -14,7 +14,7 @@ gsize read_from_connection_long (GSocketConnection *connection,
 gsize write_to_connection_str (GSocketConnection *connection,
                                gchar             *message);
 
-gsize read_from_connection_str (GSocketConnection *connection,
+gssize read_from_connection_str (GSocketConnection *connection,
                                 gchar             *buffer);
 
 gboolean ping (GSocketConnection *connection);
