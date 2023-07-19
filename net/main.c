@@ -230,7 +230,7 @@ peer_main (gpointer data)
             }
           else if (strncmp (input, "QUERY", 5) == 0)
             {
-              printf("(Peer) Query to execute:\n\t%s", input);
+              printf("(Peer) Query to execute:\n\t%s\n", input);
 
               // execute query
               GList *results = database_query (db, input + 7);
@@ -381,7 +381,7 @@ load_database (void)
   if (self->is_leader == FALSE)
     g_error("Non-leader trying to load the database of the system.");
 
-  printf("DATABASE LOADING STARTED!");
+  printf("DATABASE LOADING STARTED!\n");
 
   db_loading = TRUE;
 
