@@ -40,6 +40,7 @@ peer_delete (Peer *p)
 GList *peers = NULL;
 Peer *self = NULL;
 gboolean db_loading = FALSE;
+gboolean db_querying = FALSE;
 
 static gchar *servers_filepath = NULL;
 static gchar *database_folderpath = NULL;
@@ -92,6 +93,9 @@ client_main (gpointer data)
             {
               if (self->is_leader == FALSE)
                 g_error ("Got a QUERY command without being the leader.");
+
+              db_querying = TRUE;
+
               printf("(Client) Query to execute:\n\t%s\n", input);
 
               clock_t start, end;
@@ -115,6 +119,7 @@ client_main (gpointer data)
                       p->connection = NULL;
                       load_database();
                       write_to_connection_str (connection, "Try again!");
+                      db_querying = FALSE;
                       return NULL;
                       // TODO: Rerun query.
                     }
@@ -122,8 +127,6 @@ client_main (gpointer data)
 
               // execute query
               GList *results = database_query (db, input + 7);
-
-              sleep(1);
 
               // combine results and respond
               GString *result = records_list_to_string (results);
@@ -145,6 +148,7 @@ client_main (gpointer data)
                       p->connection = NULL;
                       load_database();
                       write_to_connection_str (connection, "Try again!");
+                          db_querying = FALSE;
                       return NULL;
                       // TODO: Rerun query.
                     }
@@ -158,6 +162,7 @@ client_main (gpointer data)
 
               write_to_connection_str (connection, result->str);
               g_string_free (result, FALSE);
+              db_querying = FALSE;
             }
         }
       else if (ping (connection) == FALSE)
@@ -232,6 +237,7 @@ peer_main (gpointer data)
             }
           else if (strncmp (input, "QUERY", 5) == 0)
             {
+              db_querying = TRUE;
               printf("(Peer) Query to execute:\n\t%s\n", input);
 
               // execute query
@@ -245,6 +251,7 @@ peer_main (gpointer data)
 
               write_to_connection_str (connection, result->str);
               g_string_free (result, FALSE);
+              db_querying = FALSE;
             }
         }
       else if (ping (connection) == FALSE)
@@ -304,7 +311,7 @@ peer_connection (GSocketService     *service,
 gboolean
 connect_with_peer (gpointer data)
 {
-  if (db_loading == TRUE)
+  if (db_loading == TRUE || db_querying == TRUE)
     return G_SOURCE_CONTINUE;
 
   Peer *p = data;
@@ -358,6 +365,9 @@ connect_with_peer (gpointer data)
 void
 seniority_succession_algorithm (void)
 {
+  if (db_loading == TRUE || db_querying == TRUE)
+    return;
+
   if (self->is_leader == TRUE)
     return; // I am the leader
 
