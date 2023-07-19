@@ -235,7 +235,12 @@ peer_main (gpointer data)
               // execute query
               GList *results = database_query (db, input + 7);
 
+              printf("(Peer) Query executed\n");
+
               GString *result = records_list_to_string (results);
+
+              printf("(Peer) Result: %s\n", result->str);
+
               write_to_connection_str (connection, result->str);
               g_string_free (result, FALSE);
             }
