@@ -94,6 +94,11 @@ client_main (gpointer data)
                 g_error ("Got a QUERY command without being the leader.");
               printf("(Client) Query to execute:\n\t%s\n", input);
 
+              clock_t start, end;
+              double cpu_time_used;
+
+              start = clock();
+
               // send query request to peers
               for (GList *lp = peers; lp != NULL; lp = lp->next)
                 {
@@ -144,6 +149,10 @@ client_main (gpointer data)
                   else
                     g_string_append (result, input);
                 }
+
+              end = clock();
+              cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+              printf("Loading time: %lf\n", cpu_time_used);
 
               write_to_connection_str (connection, result->str);
               g_string_free (result, FALSE);
