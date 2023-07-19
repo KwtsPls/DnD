@@ -123,6 +123,8 @@ client_main (gpointer data)
               // execute query
               GList *results = database_query (db, input + 7);
 
+              sleep(1);
+
               // combine results and respond
               GString *result = records_list_to_string (results);
 
