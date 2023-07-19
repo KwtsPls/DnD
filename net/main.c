@@ -134,9 +134,9 @@ client_main (gpointer data)
                     continue;
 
                   gchar input[256];
-                  gsize bytes_read = read_from_connection_str (p->connection, input);
+                  gssize bytes_read = read_from_connection_str (p->connection, input);
 
-                  printf ("Bytes read %lu: %s\n", bytes_read, input);
+                  printf ("Bytes read %ld: %s\n", bytes_read, input);
                   if (bytes_read == -1)
                     {
                       printf ("Disconnected peer (read).\n");
