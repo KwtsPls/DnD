@@ -111,7 +111,7 @@ client_main (gpointer data)
                   printf ("Bytes written %d\n", bytes_written);
                   if (bytes_written == -1)
                     {
-                      g_warning ("Disconnected peer.");
+                      printf ("Disconnected peer.\n");
                       p->connection = NULL;
                       load_database();
                       write_to_connection_str (connection, "Try again!");
@@ -139,7 +139,7 @@ client_main (gpointer data)
                   printf ("Bytes read %lu: %s\n", bytes_read, input);
                   if (bytes_read == -1)
                     {
-                      g_warning ("Disconnected peer (read).");
+                      printf ("Disconnected peer (read).\n");
                       p->connection = NULL;
                       load_database();
                       write_to_connection_str (connection, "Try again!");
