@@ -212,7 +212,7 @@ peer_main (gpointer data)
         {
           while(db_loading == TRUE);
 
-//          printf ("Got %lu bytes: %s\n", bytes_read, input);
+          printf ("Got %lu bytes: %s\n", bytes_read, input);
           if (strncmp (input, "PING", 4) == 0)
             {
               write_to_connection_str (connection, "PING");
