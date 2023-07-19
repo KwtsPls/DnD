@@ -130,7 +130,7 @@ client_main (gpointer data)
               for (GList *lp = peers; lp != NULL; lp = lp->next)
                 {
                   Peer *p = lp->data;
-                  if (p->connection == NULL || ping(p->connection) == FALSE)
+                  if (p->connection == NULL)
                     continue;
 
                   gchar input[256];
@@ -315,7 +315,7 @@ connect_with_peer (gpointer data)
       reload_db = TRUE;
     }
 
-//  printf("Attempting to connect to: %s\n", p->address);
+  printf("Attempting to connect to: %s\n", p->address);
 
   GSocketConnection *connection = NULL;
   GSocketClient *client = g_socket_client_new ();
