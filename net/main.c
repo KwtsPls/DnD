@@ -425,7 +425,7 @@ load_database (void)
 
   db_loading = FALSE;
 
-  printf("DATABASE LOADING FINISHED!");
+  printf("DATABASE LOADING FINISHED!\n");
 }
 
 static GOptionEntry entries[] =
