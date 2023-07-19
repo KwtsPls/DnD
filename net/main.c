@@ -133,6 +133,8 @@ client_main (gpointer data)
                   if (p->connection == NULL)
                     continue;
 
+                  sleep(1);
+
                   gchar input[256];
                   gssize bytes_read = read_from_connection_str (p->connection, input);
 
